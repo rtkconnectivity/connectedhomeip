@@ -259,6 +259,12 @@ if (chip_device_platform != "none" && chip_device_platform != "external") {
         "CHIP_DEVICE_LAYER_TARGET=Ameba",
         "CHIP_DEVICE_CONFIG_ENABLE_WIFI=${chip_enable_wifi}",
       ]
+    } else if (chip_device_platform == "bee") {
+       device_layer_target_define = "BEE"
+      defines += [
+        "CHIP_DEVICE_LAYER_TARGET_BEE=1",
+        "CHIP_DEVICE_LAYER_TARGET=Bee",
+      ]
     } else if (chip_device_platform == "cyw30739") {
       device_layer_target_define = "CYW30739"
       defines += [ "CHIP_DEVICE_LAYER_TARGET=Infineon/CYW30739" ]
@@ -327,6 +333,7 @@ if (chip_device_platform != "none" && chip_device_platform != "external") {
       "FAKE",
       "ANDROID",
       "AMEBA",
+      "BEE",
       "CYW30739",
       "WEBOS",
       "MW320",
@@ -533,6 +540,8 @@ if (chip_device_platform != "none") {
       _platform_target = "Infineon/PSOC6"
     } else if (chip_device_platform == "ameba") {
       _platform_target = "Ameba"
+    } else if (chip_device_platform == "bee") {
+      _platform_target = "Bee"
     } else if (chip_device_platform == "webos") {
       _platform_target = "webos"
     } else if (chip_device_platform == "bl602") {
