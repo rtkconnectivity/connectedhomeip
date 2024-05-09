@@ -35,10 +35,9 @@ list(
 
     ${chip_dir}/examples/lighting-app/lighting-common/src/ColorFormat.cpp
 
-    ${chip_dir}/examples/lighting-app/realtek_bee/main/chipinterface.cpp
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/AppTask.cpp
     ${chip_dir}/examples/lighting-app/realtek_bee/main/DeviceCallbacks.cpp
-    ${chip_dir}/examples/lighting-app/realtek_bee/main/CHIPDeviceManager.cpp
-    ${chip_dir}/examples/lighting-app/realtek_bee/main/Globals.cpp
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/main.cpp
     ${chip_dir}/examples/platform/realtek_bee/util/LEDWidget.cpp
 
     ${chip_dir}/examples/providers/DeviceInfoProviderImpl.cpp

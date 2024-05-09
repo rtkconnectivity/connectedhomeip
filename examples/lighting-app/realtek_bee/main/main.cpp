@@ -1,6 +1,7 @@
 /*
  *
  *    Copyright (c) 2020 Project CHIP Authors
+ *    All rights reserved.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,9 +16,31 @@
  *    limitations under the License.
  */
 
-#pragma once
+#include <system/SystemError.h>
+#include <zephyr/logging/log.h>
+#include "AppTask.h"
 
-#include "LEDWidget.h"
+#ifdef CONFIG_CHIP_PW_RPC
+#include "Rpc.h"
+#endif
 
-extern LEDWidget statusLED1;
-extern LEDWidget identifyLED;
+LOG_MODULE_REGISTER(app, CONFIG_CHIP_APP_LOG_LEVEL);
+
+using namespace ::chip;
+
+int main()
+{
+    CHIP_ERROR err = CHIP_NO_ERROR;
+
+#ifdef CONFIG_CHIP_PW_RPC
+    rpc::Init();
+#endif
+
+    if (err == CHIP_NO_ERROR)
+    {
+        err = AppTask::Instance().StartApp();
+    }
+
+    LOG_ERR("Exited with code %" CHIP_ERROR_FORMAT, err.Format());
+    return err == CHIP_NO_ERROR ? EXIT_SUCCESS : EXIT_FAILURE;
+}
