@@ -21,7 +21,6 @@
 
 #include <cstdio>
 #include <app/util/basic-types.h>
-#include "matter_led.h"
 
 class LEDWidget
 {
@@ -36,6 +35,5 @@ public:
     void BlinkStop();
 
 private:
-    T_MATTER_LED_HANDLE mLEDHandle;
     bool mState;
 };

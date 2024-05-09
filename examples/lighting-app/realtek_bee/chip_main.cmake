@@ -13,7 +13,7 @@ if (matter_enable_shell)
 list(
     APPEND ${list_chip_main_sources}
     #shell
-    ${chip_dir}/examples/platform/bee/shell/launch_shell.cpp
+    ${chip_dir}/examples/platform/realtek_bee/shell/launch_shell.cpp
 )
 endif (matter_enable_shell)
 
@@ -26,7 +26,7 @@ list(
     ${chip_dir}/src/app/clusters/ota-requestor/DefaultOTARequestorDriver.cpp
     ${chip_dir}/src/app/clusters/ota-requestor/DefaultOTARequestorStorage.cpp
     ${chip_dir}/src/app/clusters/ota-requestor/ota-requestor-server.cpp
-    ${chip_dir}/examples/platform/bee/ota/OTAInitializer.cpp
+    ${chip_dir}/examples/platform/realtek_bee/ota/OTAInitializer.cpp
 )
 endif (matter_enable_ota_requestor)
 
@@ -35,11 +35,11 @@ list(
 
     ${chip_dir}/examples/lighting-app/lighting-common/src/ColorFormat.cpp
 
-    ${chip_dir}/examples/lighting-app/bee/main/chipinterface.cpp
-    ${chip_dir}/examples/lighting-app/bee/main/DeviceCallbacks.cpp
-    ${chip_dir}/examples/lighting-app/bee/main/CHIPDeviceManager.cpp
-    ${chip_dir}/examples/lighting-app/bee/main/Globals.cpp
-    ${chip_dir}/examples/lighting-app/bee/main/LEDWidget.cpp
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/chipinterface.cpp
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/DeviceCallbacks.cpp
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/CHIPDeviceManager.cpp
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/Globals.cpp
+    ${chip_dir}/examples/platform/realtek_bee/util/LEDWidget.cpp
 
     ${chip_dir}/examples/providers/DeviceInfoProviderImpl.cpp
 )
@@ -64,8 +64,9 @@ target_include_directories(
     ${chip_dir}/zzz_generated/app-common
     ${chip_dir}/examples/lighting-app/lighting-common
     ${chip_dir}/examples/lighting-app/lighting-common/include
-    ${chip_dir}/examples/lighting-app/bee/main/include
-    ${chip_dir}/examples/platform/bee
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/include
+    ${chip_dir}/examples/platform/realtek_bee
+    ${chip_dir}/examples/platform/realtek_bee/util
     ${chip_dir}/examples/providers
     ${chip_dir_output}/gen/include
     ${chip_dir}/src/include/

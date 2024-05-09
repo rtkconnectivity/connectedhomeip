@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "chip_porting.h"
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <platform/CommissionableDataProvider.h>
 #include <platform/DeviceInstanceInfoProvider.h>

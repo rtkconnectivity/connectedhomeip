@@ -23,7 +23,6 @@
 #include "Server.h"
 #include <DeviceInfoProviderImpl.h>
 
-#include "chip_porting.h"
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 #include <platform/CHIPDeviceLayer.h>
@@ -34,9 +33,7 @@
 #include <app/server/OnboardingCodesUtil.h>
 #include <app/util/af.h>
 #include <lib/core/ErrorStr.h>
-#include <platform/Bee/BeeConfig.h>
-#include <platform/Bee/FactoryDataProvider.h>
-//#include <platform/Bee/NetworkCommissioningDriver.h>
+#include <platform/realtek_bee/FactoryDataProvider.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <setup_payload/ManualSetupPayloadGenerator.h>
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
@@ -65,8 +62,6 @@
 #include <openthread/thread.h>
 #include <openthread/dataset_ftd.h>
 #endif // CHIP_ENABLE_OPENTHREAD
-
-#include <os_mem.h>
 
 using namespace ::chip;
 using namespace ::chip::app;
@@ -144,11 +139,11 @@ void ButtonPressCallback(uint8_t index, uint8_t state)
     switch (index)
     {
     case 0:
-        if(state == MATTER_GPIO_KEY_STATE_RELEASE)
-        {
-            ChipTestShutdown();
-            WDT_SystemReset(RESET_ALL, SW_RESET_APP_START);
-        }
+        // if(state == MATTER_GPIO_KEY_STATE_RELEASE)
+        // {
+        //     ChipTestShutdown();
+        //     WDT_SystemReset(RESET_ALL, SW_RESET_APP_START);
+        // }
         break;
 
     default:
@@ -162,8 +157,6 @@ extern "C" void InitGPIO(void)
 
     statusLED1.Init(0);
     identifyLED.Init(1);
-
-    matter_gpio_init(ButtonPressCallback);
 }
 
 extern "C" void ChipTest(void)
@@ -194,10 +187,6 @@ extern "C" void ChipTest(void)
     chip::Shell::Engine::Root().Init();
     chip::Shell::Engine::Root().RunMainLoop();
 #endif
-
-	check_mem_peak = os_mem_peek(RAM_TYPE_DATA_ON);
-	ChipLogProgress(DeviceLayer, "os_mem_peek(RAM_TYPE_DATA_ON) : (%u)", check_mem_peak);
-
 }
 
 bool lowPowerClusterSleep()

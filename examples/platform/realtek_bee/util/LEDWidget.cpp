@@ -24,17 +24,15 @@
  */
 
 #include <stdlib.h>
-#include "matter_led.h"
 #include "LEDWidget.h"
 
 void LEDWidget::InitGpio()
 {
-    matter_led_init();
+    
 }
 
 void LEDWidget::Init(uint8_t gpioNum)
 {
-    mLEDHandle = matter_led_create(gpioNum);
     mState     = false;
 }
 
@@ -46,22 +44,21 @@ void LEDWidget::Invert(void)
 void LEDWidget::Set(bool state)
 {
     mState = state;
-    matter_led_state_set(mLEDHandle, state);
 }
 
 void LEDWidget::Blink(uint32_t changeRateMS)
 {
-    matter_led_blink_start(mLEDHandle, changeRateMS, changeRateMS, 0xFFFF);
+    
 }
 
 void LEDWidget::Blink(uint32_t onTimeMS, uint32_t offTimeMS)
 {
-    matter_led_blink_start(mLEDHandle, onTimeMS, offTimeMS, 0xFFFF);
+    
 }
 
 void LEDWidget::BlinkStop()
 {
-    matter_led_blink_stop(mLEDHandle);
+    
 }
 
 
