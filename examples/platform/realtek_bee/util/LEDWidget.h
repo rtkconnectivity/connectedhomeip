@@ -1,7 +1,5 @@
 /*
- *
- *    Copyright (c) 2020 Project CHIP Authors
- *    Copyright (c) 2018 Nest Labs, Inc.
+ *    Copyright (c) 2021 Project CHIP Authors
  *    All rights reserved.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,21 +17,32 @@
 
 #pragma once
 
-#include <cstdio>
-#include <app/util/basic-types.h>
+#include <cstdint>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/kernel.h>
 
 class LEDWidget
 {
 public:
-    static void InitGpio();
+    typedef void (*LEDWidgetStateUpdateHandler)(LEDWidget * ledWidget);
 
-    void Init(uint8_t gpioNum);
+    static void SetStateUpdateCallback(LEDWidgetStateUpdateHandler stateUpdateCb);
+    void Init(gpio_dt_spec gpio);
     void Set(bool state);
     void Invert(void);
     void Blink(uint32_t changeRateMS);
     void Blink(uint32_t onTimeMS, uint32_t offTimeMS);
-    void BlinkStop();
+    void UpdateState();
 
 private:
+    uint32_t mBlinkOnTimeMS;
+    uint32_t mBlinkOffTimeMS;
+    gpio_dt_spec mGPIO;
     bool mState;
+    k_timer mLedTimer;
+
+    static void LedStateTimerHandler(k_timer * timer);
+
+    void DoSet(bool state);
+    void ScheduleStateChange();
 };

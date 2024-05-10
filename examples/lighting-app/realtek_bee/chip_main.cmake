@@ -36,7 +36,7 @@ list(
     ${chip_dir}/examples/lighting-app/lighting-common/src/ColorFormat.cpp
 
     ${chip_dir}/examples/lighting-app/realtek_bee/main/AppTask.cpp
-    ${chip_dir}/examples/lighting-app/realtek_bee/main/DeviceCallbacks.cpp
+    ${chip_dir}/examples/lighting-app/realtek_bee/main/ZclCallbacks.cpp
     ${chip_dir}/examples/lighting-app/realtek_bee/main/main.cpp
     ${chip_dir}/examples/platform/realtek_bee/util/LEDWidget.cpp
 

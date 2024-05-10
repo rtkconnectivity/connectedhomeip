@@ -21,7 +21,7 @@
 #include "AppConfig.h"
 #include "AppEvent.h"
 #include "FabricTableDelegate.h"
-//#include "LEDUtil.h"
+#include "LEDWidget.h"
 
 #include <DeviceInfoProviderImpl.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
@@ -59,11 +59,6 @@ constexpr int kFactoryResetTriggerTimeout      = 3000;
 constexpr int kFactoryResetCancelWindowTimeout = 3000;
 constexpr int kAppEventQueueSize               = 10;
 constexpr EndpointId kLightEndpointId          = 1;
-constexpr uint8_t kDefaultMinLevel             = 0;
-constexpr uint8_t kDefaultMaxLevel             = 254;
-#if NUMBER_OF_BUTTONS == 2
-constexpr uint32_t kAdvertisingTriggerTimeout = 3000;
-#endif
 
 K_MSGQ_DEFINE(sAppEventQueue, sizeof(AppEvent), kAppEventQueueSize, alignof(AppEvent));
 k_timer sFunctionTimer;
@@ -91,7 +86,6 @@ DeferredAttributePersistenceProvider gDeferredAttributePersister(Server::GetInst
                                                                  Span<DeferredAttribute>(&gCurrentLevelPersister, 1),
                                                                  System::Clock::Milliseconds32(5000));
 
-constexpr uint32_t kIdentifyTimerDelayMS     = 250;
 constexpr uint32_t kInitOTARequestorDelaySec = 3;
 
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
@@ -166,11 +160,10 @@ CHIP_ERROR AppTask::Init()
 #endif // CHIP_ENABLE_OPENTHREAD
 
     // Initialize LEDs
-    LEDWidget::InitGpio();
     LEDWidget::SetStateUpdateCallback(LEDStateUpdateHandler);
 
-    sStatusLED.Init(SYSTEM_STATE_LED);
-    sIdentifyLED.Init(LIGHTING_STATE_LED);
+    sStatusLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led0), gpios, {}));
+    sIdentifyLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led1), gpios, {}));
     sIdentifyLED.Set(false);
 
     UpdateStatusLED();
@@ -270,32 +263,6 @@ void AppTask::IdentifyStopHandler(Identify *)
     PostEvent(event);
 }
 
-#if NUMBER_OF_BUTTONS == 2
-void AppTask::StartBLEAdvertisementAndLightActionEventHandler(const AppEvent & event)
-{
-    if (event.ButtonEvent.Action == static_cast<uint8_t>(AppEventType::ButtonPushed))
-    {
-        Instance().StartTimer(kAdvertisingTriggerTimeout);
-        Instance().mFunction = FunctionEvent::AdvertisingStart;
-    }
-    else
-    {
-        if (Instance().mFunction == FunctionEvent::AdvertisingStart && Instance().mFunctionTimerActive)
-        {
-            Instance().CancelTimer();
-            Instance().mFunction = FunctionEvent::NoneSelected;
-
-            AppEvent button_event;
-            button_event.Type               = AppEventType::Button;
-            button_event.ButtonEvent.PinNo  = BLE_ADVERTISEMENT_START_AND_LIGHTING_BUTTON;
-            button_event.ButtonEvent.Action = static_cast<uint8_t>(AppEventType::ButtonReleased);
-            button_event.Handler            = LightingActionEventHandler;
-            PostEvent(button_event);
-        }
-    }
-}
-#endif
-
 void AppTask::LightingActionEventHandler(const AppEvent & event)
 {
     PWMDevice::Action_t action = PWMDevice::INVALID_ACTION;
@@ -323,17 +290,6 @@ void AppTask::ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged)
     AppEvent button_event;
     button_event.Type = AppEventType::Button;
 
-#if NUMBER_OF_BUTTONS == 2
-    if (BLE_ADVERTISEMENT_START_AND_LIGHTING_BUTTON_MASK & hasChanged)
-    {
-        button_event.ButtonEvent.PinNo = BLE_ADVERTISEMENT_START_AND_LIGHTING_BUTTON;
-        button_event.ButtonEvent.Action =
-            static_cast<uint8_t>((BLE_ADVERTISEMENT_START_AND_LIGHTING_BUTTON_MASK & buttonState) ? AppEventType::ButtonPushed
-                                                                                                  : AppEventType::ButtonReleased);
-        button_event.Handler = StartBLEAdvertisementAndLightActionEventHandler;
-        PostEvent(button_event);
-    }
-#else
     if (LIGHTING_BUTTON_MASK & buttonState & hasChanged)
     {
         button_event.ButtonEvent.PinNo  = LIGHTING_BUTTON;
@@ -341,15 +297,6 @@ void AppTask::ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged)
         button_event.Handler            = LightingActionEventHandler;
         PostEvent(button_event);
     }
-
-    if (BLE_ADVERTISEMENT_START_BUTTON_MASK & buttonState & hasChanged)
-    {
-        button_event.ButtonEvent.PinNo  = BLE_ADVERTISEMENT_START_BUTTON;
-        button_event.ButtonEvent.Action = static_cast<uint8_t>(AppEventType::ButtonPushed);
-        button_event.Handler            = StartBLEAdvertisementHandler;
-        PostEvent(button_event);
-    }
-#endif
 
     if (FUNCTION_BUTTON_MASK & hasChanged)
     {
@@ -401,14 +348,6 @@ void AppTask::FunctionTimerEventHandler(const AppEvent & event)
         Instance().mFunction = FunctionEvent::NoneSelected;
         chip::Server::GetInstance().ScheduleFactoryReset();
     }
-    else if (Instance().mFunction == FunctionEvent::AdvertisingStart)
-    {
-        // The button was held past kAdvertisingTriggerTimeout, start BLE advertisement if we have 2 buttons UI
-#if NUMBER_OF_BUTTONS == 2
-        StartBLEAdvertisementHandler(event);
-        Instance().mFunction = FunctionEvent::NoneSelected;
-#endif
-    }
 }
 
 void AppTask::FunctionHandler(const AppEvent & event)
@@ -446,26 +385,6 @@ void AppTask::FunctionHandler(const AppEvent & event)
             Instance().mFunction = FunctionEvent::NoneSelected;
             LOG_INF("Factory Reset has been Canceled");
         }
-    }
-}
-
-void AppTask::StartBLEAdvertisementHandler(const AppEvent &)
-{
-    if (Server::GetInstance().GetFabricTable().FabricCount() != 0)
-    {
-        LOG_INF("Matter service BLE advertising not started - device is already commissioned");
-        return;
-    }
-
-    if (ConnectivityMgr().IsBLEAdvertisingEnabled())
-    {
-        LOG_INF("BLE advertising is already enabled");
-        return;
-    }
-
-    if (Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow() != CHIP_NO_ERROR)
-    {
-        LOG_ERR("OpenBasicCommissioningWindow() failed");
     }
 }
 
@@ -535,6 +454,19 @@ void AppTask::ChipEventHandler(const ChipDeviceEvent * event, intptr_t /* arg */
         sIsNetworkEnabled     = ConnectivityMgr().IsThreadEnabled();
         UpdateStatusLED();
         break;
+
+    // rock: useful or not?
+    // case DeviceEventType::kInterfaceIpAddressChanged:
+    //     if ((event->InterfaceIpAddressChanged.Type == InterfaceIpChangeType::kIpV4_Assigned) ||
+    //         (event->InterfaceIpAddressChanged.Type == InterfaceIpChangeType::kIpV6_Assigned))
+    //     {
+    //         // MDNS server restart on any ip assignment: if link local ipv6 is configured, that
+    //         // will not trigger a 'internet connectivity change' as there is no internet
+    //         // connectivity. MDNS still wants to refresh its listening interfaces to include the
+    //         // newly selected address.
+    //         chip::app::DnssdServer::Instance().StartServer();
+    //     }
+    //     break;
         
     default:
         break;
@@ -583,14 +515,6 @@ void AppTask::UpdateClusterState()
         if (status != Protocols::InteractionModel::Status::Success)
         {
             LOG_ERR("Updating on/off cluster failed: %x", to_underlying(status));
-        }
-
-        // write the current level
-        status = Clusters::LevelControl::Attributes::CurrentLevel::Set(kLightEndpointId, mPWMDevice.GetLevel());
-
-        if (status != Protocols::InteractionModel::Status::Success)
-        {
-            LOG_ERR("Updating level cluster failed: %x", to_underlying(status));
         }
     });
 }
