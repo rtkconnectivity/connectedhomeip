@@ -17,7 +17,6 @@
  */
 
 #include "AppTask.h"
-//#include "PWMDevice.h"
 
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app-common/zap-generated/ids/Attributes.h>
@@ -38,21 +37,7 @@ void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath & 
     if (clusterId == OnOff::Id && attributeId == OnOff::Attributes::OnOff::Id)
     {
         ChipLogProgress(Zcl, "Cluster OnOff: attribute OnOff set to %u", *value);
-        // AppTask::Instance().GetPWMDevice().InitiateAction(*value ? PWMDevice::ON_ACTION : PWMDevice::OFF_ACTION,
-        //                                                   static_cast<int32_t>(AppEventType::Lighting), value);
-    }
-    else if (clusterId == LevelControl::Id && attributeId == LevelControl::Attributes::CurrentLevel::Id)
-    {
-        ChipLogProgress(Zcl, "Cluster LevelControl: attribute CurrentLevel set to %u", *value);
-        // if (AppTask::Instance().GetPWMDevice().IsTurnedOn())
-        // {
-        //     AppTask::Instance().GetPWMDevice().InitiateAction(PWMDevice::LEVEL_ACTION, static_cast<int32_t>(AppEventType::Lighting),
-        //                                                       value);
-        // }
-        // else
-        // {
-        //     ChipLogDetail(Zcl, "LED is off. Try to use move-to-level-with-on-off instead of move-to-level");
-        // }
+        AppTask::Instance().GetLightingDevice().Set(*value);
     }
 }
 
@@ -63,13 +48,7 @@ void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath & 
  * It is called exactly once for each endpoint where cluster is present.
  *
  * @param endpoint   Ver.: always
- *
- * TODO Issue #3841
- * emberAfOnOffClusterInitCallback happens before the stack initialize the cluster
- * attributes to the default value.
- * The logic here expects something similar to the deprecated Plugins callback
- * emberAfPluginOnOffClusterServerPostInitCallback.
- *
+ * 
  */
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
@@ -81,9 +60,7 @@ void emberAfOnOffClusterInitCallback(EndpointId endpoint)
     if (status == Protocols::InteractionModel::Status::Success)
     {
         // Set actual state to the cluster state that was last persisted
-        // AppTask::Instance().GetPWMDevice().InitiateAction(storedValue ? PWMDevice::ON_ACTION : PWMDevice::OFF_ACTION,
-        //                                                   static_cast<int32_t>(AppEventType::Lighting),
-        //                                                   reinterpret_cast<uint8_t *>(&storedValue));
+        AppTask::Instance().GetLightingDevice().Set(storedValue);
     }
 
     AppTask::Instance().UpdateClusterState();

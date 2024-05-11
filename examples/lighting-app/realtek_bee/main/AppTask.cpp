@@ -20,12 +20,10 @@
 
 #include "AppConfig.h"
 #include "AppEvent.h"
-#include "FabricTableDelegate.h"
 #include "LEDWidget.h"
 
 #include <DeviceInfoProviderImpl.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
-#include <app/DeferredAttributePersistenceProvider.h>
 #include <app/TestEventTriggerDelegate.h>
 #include <app/clusters/identify-server/identify-server.h>
 #include <app/clusters/ota-requestor/OTATestEventTriggerHandler.h>
@@ -67,7 +65,6 @@ Identify sIdentify = { kLightEndpointId, AppTask::IdentifyStartHandler, AppTask:
                        Clusters::Identify::IdentifyTypeEnum::kVisibleIndicator };
 
 LEDWidget sStatusLED;
-LEDWidget sIdentifyLED;
 
 bool sIsNetworkProvisioned = false;
 bool sIsNetworkEnabled     = false;
@@ -75,21 +72,9 @@ bool sHaveBLEConnections   = false;
 
 chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
-// Define a custom attribute persister which makes actual write of the CurrentLevel attribute value
-// to the non-volatile storage only when it has remained constant for 5 seconds. This is to reduce
-// the flash wearout when the attribute changes frequently as a result of MoveToLevel command.
-// DeferredAttribute object describes a deferred attribute, but also holds a buffer with a value to
-// be written, so it must live so long as the DeferredAttributePersistenceProvider object.
-DeferredAttribute gCurrentLevelPersister(ConcreteAttributePath(kLightEndpointId, Clusters::LevelControl::Id,
-                                                               Clusters::LevelControl::Attributes::CurrentLevel::Id));
-DeferredAttributePersistenceProvider gDeferredAttributePersister(Server::GetInstance().GetDefaultAttributePersister(),
-                                                                 Span<DeferredAttribute>(&gCurrentLevelPersister, 1),
-                                                                 System::Clock::Milliseconds32(5000));
-
-constexpr uint32_t kInitOTARequestorDelaySec = 3;
-
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 static bool isOTAInitialized = false;
+constexpr uint32_t kInitOTARequestorDelaySec = 3;
 
 void InitOTARequestorHandler(System::Layer * systemLayer, void * appState)
 {
@@ -117,6 +102,15 @@ constexpr uint32_t kOff_ms{ 950 };
 
 CHIP_ERROR AppTask::Init()
 {
+    // Initialize LEDs
+    LEDWidget::SetStateUpdateCallback(LEDStateUpdateHandler);
+
+    sStatusLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led0), gpios, {}));
+    mIdentifyLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led1), gpios, {}));
+    mIdentifyLED.Set(false);
+
+    UpdateStatusLED();
+
     // Initialize CHIP stack
     LOG_INF("Init CHIP stack");
 
@@ -159,15 +153,6 @@ CHIP_ERROR AppTask::Init()
     return CHIP_ERROR_INTERNAL;
 #endif // CHIP_ENABLE_OPENTHREAD
 
-    // Initialize LEDs
-    LEDWidget::SetStateUpdateCallback(LEDStateUpdateHandler);
-
-    sStatusLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led0), gpios, {}));
-    sIdentifyLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led1), gpios, {}));
-    sIdentifyLED.Set(false);
-
-    UpdateStatusLED();
-
     // Initialize function button timer
     k_timer_init(&sFunctionTimer, &AppTask::FunctionTimerTimeoutCallback, nullptr);
     k_timer_user_data_set(&sFunctionTimer, this);
@@ -192,11 +177,9 @@ CHIP_ERROR AppTask::Init()
     static chip::CommonCaseDeviceServerInitParams initParams;
     initParams.InitializeStaticResourcesBeforeServerInit();
     ReturnErrorOnFailure(chip::Server::GetInstance().Init(initParams));
-    AppFabricTableDelegate::Init();
 
     gExampleDeviceInfoProvider.SetStorageDelegate(&Server::GetInstance().GetPersistentStorage());
     chip::DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
-    app::SetAttributePersistenceProvider(&gDeferredAttributePersister);
 
     ConfigurationMgr().LogDeviceConfig();
     PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kBLE));
@@ -246,8 +229,7 @@ void AppTask::IdentifyStartHandler(Identify *)
     AppEvent event;
     event.Type    = AppEventType::IdentifyStart;
     event.Handler = [](const AppEvent &) {
-        Instance().mPWMDevice.SuppressOutput();
-        sIdentifyLED.Blink(LedConsts::kIdentifyBlinkRate_ms);
+        mIdentifyLED.Blink(LedConsts::kIdentifyBlinkRate_ms);
     };
     PostEvent(event);
 }
@@ -257,46 +239,15 @@ void AppTask::IdentifyStopHandler(Identify *)
     AppEvent event;
     event.Type    = AppEventType::IdentifyStop;
     event.Handler = [](const AppEvent &) {
-        sIdentifyLED.Set(false);
-        Instance().mPWMDevice.ApplyLevel();
+        mIdentifyLED.Set(false);
     };
     PostEvent(event);
-}
-
-void AppTask::LightingActionEventHandler(const AppEvent & event)
-{
-    PWMDevice::Action_t action = PWMDevice::INVALID_ACTION;
-    int32_t actor              = 0;
-
-    if (event.Type == AppEventType::Lighting)
-    {
-        action = static_cast<PWMDevice::Action_t>(event.LightingEvent.Action);
-        actor  = event.LightingEvent.Actor;
-    }
-    else if (event.Type == AppEventType::Button)
-    {
-        action = Instance().mPWMDevice.IsTurnedOn() ? PWMDevice::OFF_ACTION : PWMDevice::ON_ACTION;
-        actor  = static_cast<int32_t>(AppEventType::Button);
-    }
-
-    if (action != PWMDevice::INVALID_ACTION && Instance().mPWMDevice.InitiateAction(action, actor, NULL))
-    {
-        LOG_INF("Action is already in progress or active.");
-    }
 }
 
 void AppTask::ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged)
 {
     AppEvent button_event;
     button_event.Type = AppEventType::Button;
-
-    if (LIGHTING_BUTTON_MASK & buttonState & hasChanged)
-    {
-        button_event.ButtonEvent.PinNo  = LIGHTING_BUTTON;
-        button_event.ButtonEvent.Action = static_cast<uint8_t>(AppEventType::ButtonPushed);
-        button_event.Handler            = LightingActionEventHandler;
-        PostEvent(button_event);
-    }
 
     if (FUNCTION_BUTTON_MASK & hasChanged)
     {
@@ -376,6 +327,7 @@ void AppTask::FunctionHandler(const AppEvent & event)
             Instance().CancelTimer();
             Instance().mFunction = FunctionEvent::NoneSelected;
 
+            //TODO: rock: software reset?
             LOG_INF("Software update is disabled");
         }
         else if (Instance().mFunctionTimerActive && Instance().mFunction == FunctionEvent::FactoryReset)
@@ -510,7 +462,7 @@ void AppTask::UpdateClusterState()
     SystemLayer().ScheduleLambda([this] {
         // write the new on/off value
         Protocols::InteractionModel::Status status =
-            Clusters::OnOff::Attributes::OnOff::Set(kLightEndpointId, mPWMDevice.IsTurnedOn());
+            Clusters::OnOff::Attributes::OnOff::Set(kLightEndpointId, mIdentifyLED.IsTurnedOn());
 
         if (status != Protocols::InteractionModel::Status::Success)
         {

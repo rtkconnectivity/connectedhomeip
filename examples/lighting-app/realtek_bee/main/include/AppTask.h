@@ -21,12 +21,11 @@
 #include <cstdint>
 #include "AppEvent.h"
 #include "LEDWidget.h"
-//#include "PWMDevice.h"
 
 #include <platform/CHIPDeviceLayer.h>
 
 #if CONFIG_CHIP_FACTORY_DATA
-#include <platform/realtek_bee/FactoryDataProvider.h>
+#include <platform/realtek_bee/zephyr/FactoryDataProvider.h>
 #else
 //#include <platform/realtek_bee/DeviceInstanceInfoProviderImpl.h>
 #endif
@@ -50,10 +49,11 @@ public:
     CHIP_ERROR StartApp();
 
     void UpdateClusterState();
-    //PWMDevice & GetPWMDevice() { return mPWMDevice; }
 
     static void IdentifyStartHandler(Identify *);
     static void IdentifyStopHandler(Identify *);
+
+    LEDWidget & GetLightingDevice(void) { return mIdentifyLED; }
 
 private:
 
@@ -65,7 +65,6 @@ private:
     static void PostEvent(const AppEvent & event);
     static void DispatchEvent(const AppEvent & event);
     static void FunctionTimerEventHandler(const AppEvent & event);
-    static void LightingActionEventHandler(const AppEvent & event);
     static void StartBLEAdvertisementHandler(const AppEvent & event);
     static void UpdateLedStateEventHandler(const AppEvent & event);
 
@@ -73,8 +72,6 @@ private:
     static void ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged);
     static void FunctionTimerTimeoutCallback(k_timer * timer);
 
-    // static void ActionInitiated(PWMDevice::Action_t action, int32_t actor);
-    // static void ActionCompleted(PWMDevice::Action_t action, int32_t actor);
     static void UpdateStatusLED();
     static void LEDStateUpdateHandler(LEDWidget & ledWidget);
     static void FunctionHandler(const AppEvent & event);
@@ -82,7 +79,8 @@ private:
 
     FunctionEvent mFunction   = FunctionEvent::NoneSelected;
     bool mFunctionTimerActive = false;
-    //PWMDevice mPWMDevice;
+
+    LEDWidget mIdentifyLED;
 
 #if CONFIG_CHIP_FACTORY_DATA
     //chip::DeviceLayer::FactoryDataProvider<chip::DeviceLayer::InternalFlashFactoryData> mFactoryDataProvider;

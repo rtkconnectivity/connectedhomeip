@@ -12,17 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build_overrides/chip.gni")
-
-mbedtls_target = "//mbedtls:mbedtls"
-
-chip_device_platform = "bee"
-chip_mdns = "platform"
-
-lwip_platform = "external"
-lwip_debug = false
+chip_device_platform = "realtek_bee"
 
 chip_inet_config_enable_ipv4 = false
 chip_inet_config_enable_tcp_endpoint = false
-
-chip_build_tests = false
