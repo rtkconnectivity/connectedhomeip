@@ -18,15 +18,24 @@
 /**
  *    @file
  *          Platform-specific configuration overrides for the chip Device Layer
- *          on Qorvo QPG platforms.
+ *          on Realtek platforms.
  */
 
 #pragma once
 
 // ==================== Platform Adaptations ====================
 
+#ifndef CHIP_DEVICE_CONFIG_ENABLE_WIFI
+#define CHIP_DEVICE_CONFIG_ENABLE_WIFI 0
+#endif
+
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFI
+#define CHIP_DEVICE_CONFIG_ENABLE_WIFI_STATION 1
+#define CHIP_DEVICE_CONFIG_ENABLE_WIFI_AP 0
+#else
 #define CHIP_DEVICE_CONFIG_ENABLE_WIFI_STATION 0
 #define CHIP_DEVICE_CONFIG_ENABLE_WIFI_AP 0
+#endif
 
 #define CHIP_DEVICE_CONFIG_ENABLE_CHIPOBLE 1
 #undef CONFIG_MATTER_BLEMGR_ADAPTER
@@ -44,7 +53,19 @@
 // These are configuration options that are unique to the platform.
 // These can be overridden by the application as needed.
 
-// ...
+#ifndef CHIP_DEVICE_CONFIG_SETTINGS_KEY
+/// Key for all Matter persistent data stored using the Zephyr Settings API
+#define CHIP_DEVICE_CONFIG_SETTINGS_KEY "mt"
+#endif //
+
+#ifndef CHIP_DEVICE_CONFIG_HEAP_STATISTICS_MALLINFO
+#if !defined(CONFIG_CHIP_MALLOC_SYS_HEAP) && defined(CONFIG_NEWLIB_LIBC)
+/// Use mallinfo() to obtain the heap usage statistics exposed by SoftwareDiagnostics cluster attributes.
+#define CHIP_DEVICE_CONFIG_HEAP_STATISTICS_MALLINFO 1
+#else
+#define CHIP_DEVICE_CONFIG_HEAP_STATISTICS_MALLINFO 0
+#endif // !defined(CONFIG_CHIP_MALLOC_SYS_HEAP) && defined(CONFIG_NEWLIB_LIBC)
+#endif // CHIP_DEVICE_CONFIG_HEAP_STATISTICS_MALLINFO
 
 // ========== Platform-specific Configuration Overrides =========
 

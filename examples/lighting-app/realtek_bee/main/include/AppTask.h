@@ -53,7 +53,7 @@ public:
     static void IdentifyStartHandler(Identify *);
     static void IdentifyStopHandler(Identify *);
 
-    LEDWidget & GetLightingDevice(void) { return mIdentifyLED; }
+    LEDWidget & GetLightingDevice(void);
 
 private:
 
@@ -79,8 +79,6 @@ private:
 
     FunctionEvent mFunction   = FunctionEvent::NoneSelected;
     bool mFunctionTimerActive = false;
-
-    LEDWidget mIdentifyLED;
 
 #if CONFIG_CHIP_FACTORY_DATA
     //chip::DeviceLayer::FactoryDataProvider<chip::DeviceLayer::InternalFlashFactoryData> mFactoryDataProvider;

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Project CHIP Authors
+# Copyright (c) 2021 Project CHIP Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-chip_device_platform = "realtek_bee"
+import("//build_overrides/build.gni")
 
-chip_inet_config_enable_ipv4 = false
-chip_inet_config_enable_tcp_endpoint = false
+import("${build_root}/toolchain/arm_gcc/arm_toolchain.gni")
 
 declare_args() {
-  # Enable factory data support
-  chip_enable_factory_data = false
+  zephyr_ar = ""
+  zephyr_cc = ""
+  zephyr_cxx = ""
+}
+
+gcc_toolchain("zephyr") {
+  ar = zephyr_ar
+  cc = zephyr_cc
+  cxx = zephyr_cxx
+
+  toolchain_args = {
+    current_os = "zephyr"
+    is_clang = false
+  }
 }

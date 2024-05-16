@@ -39,47 +39,59 @@ static_library("realtek_bee") {
     "CHIPDevicePlatformConfig.h",
     "CHIPDevicePlatformEvent.h",
     "CHIPPlatformConfig.h",
-
     "ConfigurationManagerImpl.h",
     "ConnectivityManagerImpl.cpp",
     "ConnectivityManagerImpl.h",
     "DiagnosticDataProviderImpl.h",
-    "FactoryDataDecoder.cpp",
-    "FactoryDataDecoder.h",
-    "FactoryDataProvider.cpp",
-    "FactoryDataProvider.h",
     "KeyValueStoreManagerImpl.h",
-
     "InetPlatformConfig.h",
-
-    "OTAImageProcessorImpl.cpp",
     "PlatformManagerImpl.h",
-
     "SystemPlatformConfig.h",
   ]
 
- deps = [
-    "${chip_root}/src/lib/dnssd:platform_header",
+  deps = [
     "${chip_root}/src/platform/logging:headers",
-    "${chip_root}/src/setup_payload",
   ]
 
   public = [ "${chip_root}/src/credentials/DeviceAttestationCredsProvider.h" ]
 
   public_deps = [ "${chip_root}/src/platform:platform_base" ]
 
-  public_configs = []
+  if (chip_enable_factory_data) {
+    sources += [
+      "FactoryDataDecoder.cpp",
+      "FactoryDataDecoder.h",
+      "FactoryDataProvider.cpp",
+      "FactoryDataProvider.h",
+    ]
+  } else {
+    sources += [
+      "DeviceInstanceInfoProviderImpl.cpp",
+      "DeviceInstanceInfoProviderImpl.h",
+    ]
+  }
 
   if (chip_enable_openthread) {
-
-    public_configs += [
-      "${chip_root}/src/lib/address_resolve:default_address_resolve_config",
-    ]
-
     sources += [
       "../../OpenThread/OpenThreadUtils.cpp",
-      "ThreadStackManagerImpl.cpp",
+      "../../Zephyr/ThreadStackManagerImpl.cpp",
       "ThreadStackManagerImpl.h",
+    ]
+
+    if (chip_mdns == "platform") {
+      sources += [
+        "../../OpenThread/DnssdImpl.cpp",
+        "../../OpenThread/OpenThreadDnssdImpl.cpp",
+        "../../OpenThread/OpenThreadDnssdImpl.h",
+      ]
+      deps += [ "${chip_root}/src/lib/dnssd:platform_header" ]
+    }
+  }
+
+  if (chip_enable_ota_requestor) {
+    sources += [
+      "OTAImageProcessorImpl.cpp",
+      "OTAImageProcessorImpl.h",
     ]
   }
 }

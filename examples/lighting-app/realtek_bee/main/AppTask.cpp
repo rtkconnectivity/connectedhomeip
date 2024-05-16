@@ -65,6 +65,7 @@ Identify sIdentify = { kLightEndpointId, AppTask::IdentifyStartHandler, AppTask:
                        Clusters::Identify::IdentifyTypeEnum::kVisibleIndicator };
 
 LEDWidget sStatusLED;
+LEDWidget sIdentifyLED;
 
 bool sIsNetworkProvisioned = false;
 bool sIsNetworkEnabled     = false;
@@ -106,8 +107,8 @@ CHIP_ERROR AppTask::Init()
     LEDWidget::SetStateUpdateCallback(LEDStateUpdateHandler);
 
     sStatusLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led0), gpios, {}));
-    mIdentifyLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led1), gpios, {}));
-    mIdentifyLED.Set(false);
+    sIdentifyLED.Init(GPIO_DT_SPEC_GET_OR(DT_ALIAS(led1), gpios, {}));
+    sIdentifyLED.Set(false);
 
     UpdateStatusLED();
 
@@ -169,8 +170,8 @@ CHIP_ERROR AppTask::Init()
     SetDeviceAttestationCredentialsProvider(&mFactoryDataProvider);
     SetCommissionableDataProvider(&mFactoryDataProvider);
 #else
-    SetDeviceInstanceInfoProvider(&DeviceInstanceInfoProviderMgrImpl());
-    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+    // SetDeviceInstanceInfoProvider(&DeviceInstanceInfoProviderMgrImpl());
+    // SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 #endif
 
     // Init ZCL Data Model and CHIP App Server
@@ -229,7 +230,7 @@ void AppTask::IdentifyStartHandler(Identify *)
     AppEvent event;
     event.Type    = AppEventType::IdentifyStart;
     event.Handler = [](const AppEvent &) {
-        mIdentifyLED.Blink(LedConsts::kIdentifyBlinkRate_ms);
+        sIdentifyLED.Blink(LedConsts::kIdentifyBlinkRate_ms);
     };
     PostEvent(event);
 }
@@ -239,9 +240,14 @@ void AppTask::IdentifyStopHandler(Identify *)
     AppEvent event;
     event.Type    = AppEventType::IdentifyStop;
     event.Handler = [](const AppEvent &) {
-        mIdentifyLED.Set(false);
+        sIdentifyLED.Set(false);
     };
     PostEvent(event);
+}
+
+LEDWidget & AppTask::GetLightingDevice(void)
+{
+    return sIdentifyLED;
 }
 
 void AppTask::ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged)
@@ -249,14 +255,14 @@ void AppTask::ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged)
     AppEvent button_event;
     button_event.Type = AppEventType::Button;
 
-    if (FUNCTION_BUTTON_MASK & hasChanged)
-    {
-        button_event.ButtonEvent.PinNo = FUNCTION_BUTTON;
-        button_event.ButtonEvent.Action =
-            static_cast<uint8_t>((FUNCTION_BUTTON_MASK & buttonState) ? AppEventType::ButtonPushed : AppEventType::ButtonReleased);
-        button_event.Handler = FunctionHandler;
-        PostEvent(button_event);
-    }
+    // if (FUNCTION_BUTTON_MASK & hasChanged)
+    // {
+    //     button_event.ButtonEvent.PinNo = FUNCTION_BUTTON;
+    //     button_event.ButtonEvent.Action =
+    //         static_cast<uint8_t>((FUNCTION_BUTTON_MASK & buttonState) ? AppEventType::ButtonPushed : AppEventType::ButtonReleased);
+    //     button_event.Handler = FunctionHandler;
+    //     PostEvent(button_event);
+    // }
 }
 
 void AppTask::FunctionTimerTimeoutCallback(k_timer * timer)
@@ -303,8 +309,8 @@ void AppTask::FunctionTimerEventHandler(const AppEvent & event)
 
 void AppTask::FunctionHandler(const AppEvent & event)
 {
-    if (event.ButtonEvent.PinNo != FUNCTION_BUTTON)
-        return;
+    // if (event.ButtonEvent.PinNo != FUNCTION_BUTTON)
+    //     return;
 
     // To trigger software update: press the FUNCTION_BUTTON button briefly (< kFactoryResetTriggerTimeout)
     // To initiate factory reset: press the FUNCTION_BUTTON for kFactoryResetTriggerTimeout + kFactoryResetCancelWindowTimeout
@@ -462,7 +468,7 @@ void AppTask::UpdateClusterState()
     SystemLayer().ScheduleLambda([this] {
         // write the new on/off value
         Protocols::InteractionModel::Status status =
-            Clusters::OnOff::Attributes::OnOff::Set(kLightEndpointId, mIdentifyLED.IsTurnedOn());
+            Clusters::OnOff::Attributes::OnOff::Set(kLightEndpointId, sIdentifyLED.IsTurnedOn());
 
         if (status != Protocols::InteractionModel::Status::Success)
         {

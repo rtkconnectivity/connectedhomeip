@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Project CHIP Authors
+# Copyright (c) 2022 Project CHIP Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-chip_device_platform = "realtek_bee"
+import("//build_overrides/build.gni")
+import("//build_overrides/chip.gni")
 
-chip_inet_config_enable_ipv4 = false
-chip_inet_config_enable_tcp_endpoint = false
+import("${chip_root}/build/chip/tests.gni")
+
+assert(current_os == "zephyr")
 
 declare_args() {
-  # Enable factory data support
-  chip_enable_factory_data = false
+  chip_build_example_providers = false
+}
+
+group("realtek_bee") {
+  deps = [ "${chip_root}/src/lib" ]
+
+  if (chip_build_tests) {
+    deps += [ "${chip_root}/src:tests" ]
+  }
+
+  if (chip_build_example_providers) {
+    deps += [ "${chip_root}/examples/providers:device_info_provider" ]
+  }
+}
+
+group("default") {
+  deps = [ ":realtek_bee" ]
 }

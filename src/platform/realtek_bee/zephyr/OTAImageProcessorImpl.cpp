@@ -19,7 +19,6 @@
 #include <app/clusters/ota-requestor/OTADownloader.h>
 #include <app/clusters/ota-requestor/OTARequestorInterface.h>
 #include "OTAImageProcessorImpl.h"
-//#include "matter_ota.h"
 
 namespace chip {
 

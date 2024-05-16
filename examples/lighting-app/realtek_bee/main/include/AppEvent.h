@@ -21,7 +21,7 @@
 #include <cstdint>
 
 struct AppEvent;
-typedef void (*EventHandler)(AppEvent *);
+using EventHandler = void (*)(const AppEvent &);
 
 class LEDWidget;
 

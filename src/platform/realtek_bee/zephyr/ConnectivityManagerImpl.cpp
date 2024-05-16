@@ -14,8 +14,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-/* this file behaves like a config.h, comes first */
+
 #include <platform/internal/CHIPDeviceLayerInternal.h>
+
+#include <platform/ConnectivityManager.h>
+#include <platform/internal/BLEManager.h>
+
+#include <lib/support/CodeUtils.h>
+#include <lib/support/logging/CHIPLogging.h>
 
 #include <platform/internal/GenericConnectivityManagerImpl_UDP.ipp>
 
@@ -31,16 +37,6 @@
 #include <platform/internal/GenericConnectivityManagerImpl_Thread.ipp>
 #endif
 
-#include <lib/support/CodeUtils.h>
-#include <lib/support/logging/CHIPLogging.h>
-#include <platform/ConnectivityManager.h>
-#include <platform/internal/BLEManager.h>
-
-#include <lwip/dns.h>
-#include <lwip/ip_addr.h>
-#include <lwip/nd6.h>
-#include <lwip/netif.h>
-
 using namespace ::chip;
 using namespace ::chip::TLV;
 using namespace ::chip::DeviceLayer::Internal;
@@ -52,17 +48,13 @@ ConnectivityManagerImpl ConnectivityManagerImpl::sInstance;
 
 CHIP_ERROR ConnectivityManagerImpl::_Init()
 {
-    CHIP_ERROR err = CHIP_NO_ERROR;
-
-    // Initialize the generic base classes that require it.
 #if CHIP_DEVICE_CONFIG_ENABLE_THREAD
     GenericConnectivityManagerImpl_Thread<ConnectivityManagerImpl>::_Init();
 #endif
-
-    SuccessOrExit(err);
-
-exit:
-    return err;
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFI
+    ReturnErrorOnFailure(InitWiFi());
+#endif
+    return CHIP_NO_ERROR;
 }
 
 void ConnectivityManagerImpl::_OnPlatformEvent(const ChipDeviceEvent * event)

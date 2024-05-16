@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Project CHIP Authors
+# Copyright (c) 2021 Project CHIP Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build_overrides/chip.gni")
+
+import("${chip_root}/src/crypto/crypto.gni")
+
 chip_device_platform = "realtek_bee"
 
-chip_inet_config_enable_ipv4 = false
-chip_inet_config_enable_tcp_endpoint = false
+chip_build_tests = false
 
-declare_args() {
-  # Enable factory data support
-  chip_enable_factory_data = false
-}
+chip_project_config_include = ""
+chip_system_project_config_include = ""
+chip_ble_project_config_include = ""
+
+chip_crypto = "mbedtls"
+chip_external_mbedtls = true
+
+custom_toolchain = "${chip_root}/config/realtek_bee/chip-gn/toolchain:zephyr"
+
+pw_build_PIP_CONSTRAINTS = [ "${chip_root}/scripts/setup/constraints.txt" ]
