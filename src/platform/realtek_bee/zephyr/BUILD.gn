@@ -24,6 +24,7 @@ static_library("realtek_bee") {
     "../../SingletonConfigurationManager.cpp",
     "../../Zephyr/BLEAdvertisingArbiter.cpp",
     "../../Zephyr/BLEAdvertisingArbiter.h",
+    "../../Zephyr/BLEManagerImpl.cpp",
     "../../Zephyr/ConfigurationManagerImpl.cpp",
     "../../Zephyr/DiagnosticDataProviderImpl.cpp",
     "../../Zephyr/DiagnosticDataProviderImpl.h",

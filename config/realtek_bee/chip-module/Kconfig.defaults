@@ -237,9 +237,12 @@ config NET_MAX_CONTEXTS
 config NET_CONFIG_INIT_TIMEOUT
     default 0
 
-# mbedTLS tweaks
+# Configure MBEDTLS lib
 config MBEDTLS_USER_CONFIG_ENABLE
-    default n
+    default y
+
+config MBEDTLS_USER_CONFIG_FILE
+    default "bee4-mbedtls-config.h"
 
 # getopt version
 config GETOPT_LONG

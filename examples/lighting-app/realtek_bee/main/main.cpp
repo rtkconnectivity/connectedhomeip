@@ -28,6 +28,115 @@ LOG_MODULE_REGISTER(app, CONFIG_CHIP_APP_LOG_LEVEL);
 
 using namespace ::chip;
 
+#include <openthread/instance.h>
+#include <openthread/platform/time.h>
+#include <openthread/platform/alarm-milli.h>
+#include <openthread/platform/alarm-micro.h>
+#include <openthread-system.h>
+//#include "rtl_wdt.h"
+#include "soc.h"
+#include "mac_driver.h"
+
+extern "C"
+{
+// replace misc.c
+//extern void WDG_SystemReset(WDTMode_TypeDef wdt_mode, int reset_reason);
+void __wrap_otPlatReset(otInstance *aInstance)
+{
+ 	ARG_UNUSED(aInstance);
+	//WDG_SystemReset(RESET_ALL, 0xff);
+}
+
+bool milli_fired = false;
+void milli_handler(void)
+{
+    milli_fired = true;
+    otSysEventSignalPending();
+}
+
+bool micro_fired = false;
+void micro_handler(void)
+{
+    micro_fired = true;
+    otSysEventSignalPending();
+}
+
+typedef void (*bt_timer_handler_t)(void);
+extern void mac_RegisterBtTimerHandler(uint32_t tid, bt_timer_handler_t handler);
+void __wrap_platformAlarmInit(void)
+{
+    mac_RegisterBtTimerHandler(MAC_BT_TIMER0, milli_handler);
+    mac_RegisterBtTimerHandler(MAC_BT_TIMER1, micro_handler);
+}
+
+void __wrap_platformAlarmProcess(otInstance *aInstance)
+{
+#if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
+	if (micro_fired) {
+		micro_fired = false;
+		otPlatAlarmMicroFired(aInstance);
+	}
+#endif
+	if (milli_fired) {
+		milli_fired = false;
+        otPlatAlarmMilliFired(aInstance);
+	}
+}
+
+uint32_t __wrap_otPlatAlarmMicroGetNow(void)
+{
+    return (uint32_t)otPlatTimeGet();
+}
+
+void __wrap_otPlatAlarmMicroStartAt(otInstance *aInstance, uint32_t t0, uint32_t dt)
+{
+    uint64_t now = otPlatTimeGet();
+    uint64_t target_us = mac_ConvertT0AndDtTo64BitTime(t0, dt, &now);
+    if (target_us > now)
+    {
+        target_us = target_us % MAX_BT_CLOCK_COUNTER;
+        mac_SetBTClkUSInt(MAC_BT_TIMER1, target_us);
+    }
+    else
+    {
+        otPlatAlarmMicroFired(aInstance);
+    }
+}
+
+void __wrap_otPlatAlarmMicroStop(otInstance *aInstance)
+{
+    OT_UNUSED_VARIABLE(aInstance);
+}
+
+uint32_t __wrap_otPlatAlarmMilliGetNow(void)
+{
+    return (uint32_t)(otPlatTimeGet() / 1000);
+}
+
+void __wrap_otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t t0, uint32_t dt)
+{
+    uint64_t now = otPlatTimeGet();
+    uint64_t target_us;
+    uint64_t now_ms = now/1000;
+    uint64_t target_ms = mac_ConvertT0AndDtTo64BitTime(t0, dt, &now_ms);
+    if (target_ms > now_ms)
+    {
+        target_us = now + (target_ms - now_ms)*1000;
+        target_us = target_us % MAX_BT_CLOCK_COUNTER;
+        mac_SetBTClkUSInt(MAC_BT_TIMER0, target_us);
+    }
+    else
+    {
+        otPlatAlarmMilliFired(aInstance);
+    }
+}
+
+void __wrap_otPlatAlarmMilliStop(otInstance *aInstance)
+{
+    OT_UNUSED_VARIABLE(aInstance);
+}
+}
+
 int main()
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
