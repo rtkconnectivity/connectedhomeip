@@ -25,11 +25,20 @@ get_filename_component(GEN_DIR ${CHIP_ROOT}/zzz_generated/ REALPATH)
 #   unset(LOCAL_DTC_OVERLAY_FILE)
 # endif()
 
-# if(EXISTS "${CHIP_ROOT}/src/platform/realtek_bee/${BOARD}.overlay")
-#   set(GLOBAL_DTC_OVERLAY_FILE "${CHIP_ROOT}/src/platform/realtek_bee/${BOARD}.overlay")
-# else()
-#   unset(GLOBAL_DTC_OVERLAY_FILE)
-# endif()
+if(EXISTS "${CHIP_ROOT}/src/platform/realtek_bee/zephyr/${BOARD}.overlay")
+  set(GLOBAL_DTC_OVERLAY_FILE "${CHIP_ROOT}/src/platform/realtek_bee/zephyr/${BOARD}.overlay")
+else()
+  unset(GLOBAL_DTC_OVERLAY_FILE)
+endif()
+
+if(DTC_OVERLAY_FILE)
+  set(DTC_OVERLAY_FILE
+    "${DTC_OVERLAY_FILE} ${GLOBAL_DTC_OVERLAY_FILE}"
+    CACHE STRING "" FORCE
+  )
+else()
+  set(DTC_OVERLAY_FILE ${GLOBAL_DTC_OVERLAY_FILE})
+endif()
 
 # if(DTC_OVERLAY_FILE)
 #   set(DTC_OVERLAY_FILE
