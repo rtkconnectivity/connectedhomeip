@@ -22,6 +22,10 @@
 	status = "okay";
 };
 
+&flash {
+    reg = <0x4000000 DT_SIZE_M(4)>;
+};
+
 &tcm {
     /delete-node/ memory@100c00;
     /delete-node/ memory@119c00;
@@ -29,16 +33,16 @@
 
     ram_data: memory@100c00 {
         device_type = "ram data region";
-        reg = <0x100c00 0x2c000>;
+        reg = <0x100c00 0x28000>;
     };
-    ram_code: memory@12cc00 {
+    ram_code: memory@128c00 {
         device_type = "ram code region";
         compatible = "zephyr,memory-region", "arm,itcm";
-        reg = <0x12cc00 0x1A000>;
+        reg = <0x128c00 0xB000>;
         zephyr,memory-region = "ITCM";
     };
-    heap: memory@146c00 {
+    heap: memory@133c00 {
         device_type = "heap region";
-        reg = <0x146c00 0x9000>;
+        reg = <0x133c00 0x9000>;
     };
 };
