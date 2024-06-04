@@ -69,7 +69,7 @@ private:
     static void UpdateLedStateEventHandler(const AppEvent & event);
 
     static void ChipEventHandler(const chip::DeviceLayer::ChipDeviceEvent * event, intptr_t arg);
-    static void ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged);
+    static void ButtonEventHandler(uint8_t buttonIdx, uint8_t state);
     static void FunctionTimerTimeoutCallback(k_timer * timer);
 
     static void UpdateStatusLED();

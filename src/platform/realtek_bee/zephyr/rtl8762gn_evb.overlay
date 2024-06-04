@@ -11,14 +11,47 @@
 		};
 	};
 
+    buttons {
+		compatible = "gpio-keys";
+		button0: button_0 {
+			gpios = <&gpiob 5 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 0";
+		};
+		button1: button_1 {
+			gpios = <&gpiob 6 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 1";
+		};
+		button2: button_2 {
+			gpios = <&gpioa 25 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 2";
+		};
+		button3: button_3 {
+			gpios = <&gpioa 24 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 3";
+		};
+        button4: button_4 {
+			gpios = <&gpiob 2 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Push button switch 3";
+		};
+    };
+
 	/* These aliases are provided for compatibility with samples */
 	aliases {
 		led0 = &led0;
 		led1 = &led1;
+        sw0 = &button0;
+		sw1 = &button1;
+		sw2 = &button2;
+		sw3 = &button3;
+        sw4 = &button4;
 	};
 };
 
 &gpioa {
+	status = "okay";
+};
+
+&gpiob {
 	status = "okay";
 };
 

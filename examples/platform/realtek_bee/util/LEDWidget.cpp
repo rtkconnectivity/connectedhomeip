@@ -21,7 +21,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(LEDWidget);
+LOG_MODULE_REGISTER(LEDWidget, CONFIG_CHIP_APP_LOG_LEVEL);
 
 static LEDWidget::LEDWidgetStateUpdateHandler sStateUpdateCallback;
 

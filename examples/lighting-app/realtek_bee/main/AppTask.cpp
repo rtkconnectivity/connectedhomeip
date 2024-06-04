@@ -21,6 +21,7 @@
 #include "AppConfig.h"
 #include "AppEvent.h"
 #include "LEDWidget.h"
+#include "matter_button.h"
 
 #include <DeviceInfoProviderImpl.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
@@ -111,6 +112,14 @@ CHIP_ERROR AppTask::Init()
     sIdentifyLED.Set(false);
 
     UpdateStatusLED();
+
+    // Initialize buttons
+    int ret = matter_button_init(ButtonEventHandler);
+    if (ret)
+    {
+        LOG_ERR("matter_button_init() failed");
+        return chip::System::MapErrorZephyr(ret);
+    }
 
     // Initialize CHIP stack
     LOG_INF("Init CHIP stack");
@@ -250,19 +259,16 @@ LEDWidget & AppTask::GetLightingDevice(void)
     return sIdentifyLED;
 }
 
-void AppTask::ButtonEventHandler(uint32_t buttonState, uint32_t hasChanged)
+void AppTask::ButtonEventHandler(uint8_t buttonIdx, uint8_t state)
 {
     AppEvent button_event;
-    button_event.Type = AppEventType::Button;
 
-    // if (FUNCTION_BUTTON_MASK & hasChanged)
-    // {
-    //     button_event.ButtonEvent.PinNo = FUNCTION_BUTTON;
-    //     button_event.ButtonEvent.Action =
-    //         static_cast<uint8_t>((FUNCTION_BUTTON_MASK & buttonState) ? AppEventType::ButtonPushed : AppEventType::ButtonReleased);
-    //     button_event.Handler = FunctionHandler;
-    //     PostEvent(button_event);
-    // }
+    button_event.Type = AppEventType::Button;
+    button_event.ButtonEvent.ButtonIdx = buttonIdx;
+    button_event.ButtonEvent.Action = 
+        static_cast<uint8_t>((state == MATTER_BUTTON_STATE_PRESS) ? AppEventType::ButtonPushed : AppEventType::ButtonReleased);
+    button_event.Handler = FunctionHandler;
+    PostEvent(button_event);
 }
 
 void AppTask::FunctionTimerTimeoutCallback(k_timer * timer)
@@ -309,40 +315,49 @@ void AppTask::FunctionTimerEventHandler(const AppEvent & event)
 
 void AppTask::FunctionHandler(const AppEvent & event)
 {
-    // if (event.ButtonEvent.PinNo != FUNCTION_BUTTON)
-    //     return;
+    LOG_INF("Button state changed: index %d, action %d", event.ButtonEvent.ButtonIdx, event.ButtonEvent.Action);
 
-    // To trigger software update: press the FUNCTION_BUTTON button briefly (< kFactoryResetTriggerTimeout)
-    // To initiate factory reset: press the FUNCTION_BUTTON for kFactoryResetTriggerTimeout + kFactoryResetCancelWindowTimeout
-    // All LEDs start blinking after kFactoryResetTriggerTimeout to signal factory reset has been initiated.
-    // To cancel factory reset: release the FUNCTION_BUTTON once all LEDs start blinking within the
-    // kFactoryResetCancelWindowTimeout
-    if (event.ButtonEvent.Action == static_cast<uint8_t>(AppEventType::ButtonPushed))
+    switch(event.ButtonEvent.ButtonIdx)
     {
-        if (!Instance().mFunctionTimerActive && Instance().mFunction == FunctionEvent::NoneSelected)
+    case 0:
         {
-            Instance().StartTimer(kFactoryResetTriggerTimeout);
-            Instance().mFunction = FunctionEvent::SoftwareUpdate;
-        }
-    }
-    else
-    {
-        // If the button was released before factory reset got initiated, trigger a software update.
-        if (Instance().mFunctionTimerActive && Instance().mFunction == FunctionEvent::SoftwareUpdate)
-        {
-            Instance().CancelTimer();
-            Instance().mFunction = FunctionEvent::NoneSelected;
+            // To trigger software update: press the FUNCTION_BUTTON button briefly (< kFactoryResetTriggerTimeout)
+            // To initiate factory reset: press the FUNCTION_BUTTON for kFactoryResetTriggerTimeout + kFactoryResetCancelWindowTimeout
+            // All LEDs start blinking after kFactoryResetTriggerTimeout to signal factory reset has been initiated.
+            // To cancel factory reset: release the FUNCTION_BUTTON once all LEDs start blinking within the
+            // kFactoryResetCancelWindowTimeout
+            if (event.ButtonEvent.Action == static_cast<uint8_t>(AppEventType::ButtonPushed))
+            {
+                if (!Instance().mFunctionTimerActive && Instance().mFunction == FunctionEvent::NoneSelected)
+                {
+                    Instance().StartTimer(kFactoryResetTriggerTimeout);
+                    Instance().mFunction = FunctionEvent::SoftwareUpdate;
+                }
+            }
+            else
+            {
+                // If the button was released before factory reset got initiated, trigger a software update.
+                if (Instance().mFunctionTimerActive && Instance().mFunction == FunctionEvent::SoftwareUpdate)
+                {
+                    Instance().CancelTimer();
+                    Instance().mFunction = FunctionEvent::NoneSelected;
 
-            //TODO: rock: software reset?
-            LOG_INF("Software update is disabled");
+                    //TODO: rock: software reset?
+                    LOG_INF("Software update is disabled");
+                }
+                else if (Instance().mFunctionTimerActive && Instance().mFunction == FunctionEvent::FactoryReset)
+                {
+                    UpdateStatusLED();
+                    Instance().CancelTimer();
+                    Instance().mFunction = FunctionEvent::NoneSelected;
+                    LOG_INF("Factory Reset has been Canceled");
+                }
+            }
         }
-        else if (Instance().mFunctionTimerActive && Instance().mFunction == FunctionEvent::FactoryReset)
-        {
-            UpdateStatusLED();
-            Instance().CancelTimer();
-            Instance().mFunction = FunctionEvent::NoneSelected;
-            LOG_INF("Factory Reset has been Canceled");
-        }
+        break;
+
+    default:
+        break;
     }
 }
 

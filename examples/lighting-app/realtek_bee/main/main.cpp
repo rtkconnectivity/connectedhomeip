@@ -18,6 +18,7 @@
 
 #include <system/SystemError.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/reboot.h>
 #include "AppTask.h"
 
 #ifdef CONFIG_CHIP_PW_RPC
@@ -33,18 +34,17 @@ using namespace ::chip;
 #include <openthread/platform/alarm-milli.h>
 #include <openthread/platform/alarm-micro.h>
 #include <openthread-system.h>
-//#include "rtl_wdt.h"
 #include "soc.h"
 #include "mac_driver.h"
 
 extern "C"
 {
 // replace misc.c
-//extern void WDG_SystemReset(WDTMode_TypeDef wdt_mode, int reset_reason);
+
 void __wrap_otPlatReset(otInstance *aInstance)
 {
  	ARG_UNUSED(aInstance);
-	//WDG_SystemReset(RESET_ALL, 0xff);
+	sys_reboot(SYS_REBOOT_WARM);
 }
 
 bool milli_fired = false;

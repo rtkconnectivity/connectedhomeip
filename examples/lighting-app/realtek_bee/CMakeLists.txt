@@ -74,7 +74,8 @@ target_sources(app PRIVATE
                main/main.cpp
                main/AppTask.cpp
                main/ZclCallbacks.cpp
-               ${REALTEK_COMMON}/util/LEDWidget.cpp)
+               ${REALTEK_COMMON}/util/LEDWidget.cpp
+               ${REALTEK_COMMON}/util/matter_button.c)
 
 target_link_options(app
               PUBLIC
