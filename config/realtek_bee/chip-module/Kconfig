@@ -166,7 +166,7 @@ endif #CHIP_FACTORY_DATA_BUILD
 # See config/zephyr/Kconfig for full definition
 config CHIP_FACTORY_RESET_ERASE_NVS
 	bool
-	default n
+	default y
 
 endif
 

@@ -57,6 +57,19 @@
 
 &flash {
     reg = <0x4000000 DT_SIZE_M(4)>;
+	partitions {
+		/delete-node/ partition@2d000;
+		/delete-node/ partition@fc000;
+
+		app_partition: partition@2d000 {
+			label = "app-image";
+			reg = <0x2D000 DT_SIZE_K(1024)>;
+		};
+		storage_partition: partition@12d000 {
+			label = "storage";
+			reg = <0x12d000 DT_SIZE_K(32)>;
+		};
+	};
 };
 
 &tcm {
@@ -66,16 +79,16 @@
 
     ram_data: memory@100c00 {
         device_type = "ram data region";
-        reg = <0x100c00 0x28000>;
+        reg = <0x100c00 0x29000>;
     };
-    ram_code: memory@128c00 {
+    ram_code: memory@129c00 {
         device_type = "ram code region";
         compatible = "zephyr,memory-region", "arm,itcm";
-        reg = <0x128c00 0xB000>;
+        reg = <0x129c00 0xc000>;
         zephyr,memory-region = "ITCM";
     };
-    heap: memory@133c00 {
+    heap: memory@135c00 {
         device_type = "heap region";
-        reg = <0x133c00 0x9000>;
+        reg = <0x135c00 0x7000>;
     };
 };

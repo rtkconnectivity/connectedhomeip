@@ -30,11 +30,11 @@ choice LOG_MODE
 endchoice
 
 choice MATTER_LOG_LEVEL_CHOICE
-    default MATTER_LOG_LEVEL_INF
+    default MATTER_LOG_LEVEL_DBG
 endchoice
 
 config CHIP_APP_LOG_LEVEL
-    default 3 # info
+    default 4 # info
 
 config LOG_DEFAULT_LEVEL
     default 1 # error
@@ -43,6 +43,21 @@ config CHIP_LOG_SIZE_OPTIMIZATION
     default y
 
 endif
+
+config PRINTK_SYNC
+	default y
+
+config ASSERT
+    default n
+
+config ASSERT_NO_COND_INFO
+    default n
+
+config ASSERT_NO_MSG_INFO
+    default n
+
+config HW_STACK_PROTECTION
+    default y
 
 config SHELL
     default y if CHIP_LIB_SHELL
@@ -57,20 +72,13 @@ config POSIX_MAX_FDS
 
 # Application stack size
 config MAIN_STACK_SIZE
-    default 3240 if PM
-    default 4096
+    default 8192
 
 config INIT_STACKS
     default y
 
-config IDLE_STACK_SIZE
-    default 512 if PM
-
-config ISR_STACK_SIZE
-    default 502 if PM
-
 config SYSTEM_WORKQUEUE_STACK_SIZE
-    default 616 if PM
+    default 2048
 
 config HEAP_MEM_POOL_SIZE
     default 256
@@ -131,10 +139,10 @@ config BT_BUF_ACL_TX_SIZE
     default 251
 
 config BT_RX_STACK_SIZE
-    default 810
+    default 2200
 
 config BT_HCI_TX_STACK_SIZE
-    default 640
+    default 1024
 
 config BT_DEVICE_NAME_GATT_WRITABLE
     bool
@@ -201,10 +209,9 @@ config CHIP_ENABLE_ICD_SUPPORT
 	default y if CHIP_THREAD_DEVICE_ROLE_SLEEPY_END_DEVICE
 
 config OPENTHREAD_THREAD_STACK_SIZE
-    default 2178 if PM
+    default 4096
 
 config OPENTHREAD_RADIO_WORKQUEUE_STACK_SIZE
-    default 361 if PM
     default 608
 
 config OPENTHREAD_SLAAC
@@ -214,7 +221,6 @@ config OPENTHREAD_MANUAL_START
     default y
 
 config OPENTHREAD_DEFAULT_TX_POWER
-    default 3 if PM
     default 9
 
 config NET_TX_STACK_SIZE
