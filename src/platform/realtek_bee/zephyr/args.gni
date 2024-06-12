@@ -18,6 +18,8 @@ chip_inet_config_enable_ipv4 = false
 chip_inet_config_enable_tcp_endpoint = false
 
 declare_args() {
+  chip_malloc_sys_heap = false
+  
   # Enable factory data support
   chip_enable_factory_data = false
 }

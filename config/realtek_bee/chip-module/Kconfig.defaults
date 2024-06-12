@@ -70,6 +70,10 @@ config POSIX_MAX_FDS
     int
     default 16
 
+choice LIBC_IMPLEMENTATION
+	default NEWLIB_LIBC
+endchoice
+
 # Application stack size
 config MAIN_STACK_SIZE
     default 8192
@@ -81,7 +85,10 @@ config SYSTEM_WORKQUEUE_STACK_SIZE
     default 2048
 
 config HEAP_MEM_POOL_SIZE
-    default 256
+    default 1024
+
+config CHIP_MALLOC_SYS_HEAP_SIZE
+    default 8192 if NET_L2_OPENTHREAD
 
 config COMMON_LIBC_MALLOC_ARENA_SIZE 
     default 12288

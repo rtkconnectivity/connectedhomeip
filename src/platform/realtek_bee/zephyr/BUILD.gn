@@ -32,6 +32,7 @@ static_library("realtek_bee") {
     "../../Zephyr/KeyValueStoreManagerImpl.cpp",
     "../../Zephyr/Logging.cpp",
     "../../Zephyr/PlatformManagerImpl.cpp",
+    "../../Zephyr/SysHeapMalloc.h",
     "../../Zephyr/SystemTimeSupport.cpp",
     "../../Zephyr/ZephyrConfig.cpp",
     "../../Zephyr/ZephyrConfig.h",
@@ -70,6 +71,10 @@ static_library("realtek_bee") {
       "DeviceInstanceInfoProviderImpl.cpp",
       "DeviceInstanceInfoProviderImpl.h",
     ]
+  }
+
+  if (chip_malloc_sys_heap) {
+    sources += [ "../../Zephyr/SysHeapMalloc.cpp" ]
   }
 
   if (chip_enable_openthread) {

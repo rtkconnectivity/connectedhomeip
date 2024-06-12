@@ -91,6 +91,9 @@ config CHIP_EXAMPLE_DEVICE_INFO_PROVIDER
 	bool "Include default device information provider build"
 	default y
 
+config CHIP_MALLOC_SYS_HEAP
+	default y if !ARCH_POSIX
+
 config CHIP_FACTORY_DATA
 	bool "Enable Factory Data support"
 	select ZCBOR
