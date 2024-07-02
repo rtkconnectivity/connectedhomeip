@@ -178,7 +178,7 @@ config NVS_LOOKUP_CACHE
     default y
 
 config NVS_LOOKUP_CACHE_SIZE
-    default 2048 if !PM
+    default 512
 
 # Set multiplicator of Name Value Storage (NVS) as 1 to reach NVS sector size 4KB
 # nvs_sector_size = flash_page_size * mult = 4KB * 1 = 4KB
@@ -187,7 +187,7 @@ config SETTINGS_NVS_SECTOR_SIZE_MULT
 
 # Set sector counter of NVS
 config SETTINGS_NVS_SECTOR_COUNT
-    default 12
+    default 8
 
 # Enable OpenThread
 
@@ -215,26 +215,11 @@ endchoice
 config CHIP_ENABLE_ICD_SUPPORT
 	default y if CHIP_THREAD_DEVICE_ROLE_SLEEPY_END_DEVICE
 
-config OPENTHREAD_THREAD_STACK_SIZE
-    default 4096
-
-config OPENTHREAD_RADIO_WORKQUEUE_STACK_SIZE
-    default 608
-
 config OPENTHREAD_SLAAC
     default y
 
 config OPENTHREAD_MANUAL_START
     default y
-
-config OPENTHREAD_DEFAULT_TX_POWER
-    default 9
-
-config NET_TX_STACK_SIZE
-    default 554 if PM
-
-config NET_RX_STACK_SIZE
-    default 554 if PM
 
 # Disable certain parts of Zephyr IPv6 stack
 config NET_IPV6_NBR_CACHE
@@ -256,6 +241,19 @@ config MBEDTLS_USER_CONFIG_ENABLE
 
 config MBEDTLS_USER_CONFIG_FILE
     default "bee4-mbedtls-config.h"
+
+config MBEDTLS_ZEPHYR_ENTROPY
+	default y
+
+config MBEDTLS_ENABLE_HEAP
+	default y
+
+config MBEDTLS_HEAP_SIZE
+	default 8192
+
+config MBEDTLS_ECP_C
+    default y
+
 
 # getopt version
 config GETOPT_LONG

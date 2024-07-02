@@ -27,7 +27,7 @@
 #if CONFIG_CHIP_FACTORY_DATA
 #include <platform/realtek_bee/zephyr/FactoryDataProvider.h>
 #else
-//#include <platform/realtek_bee/DeviceInstanceInfoProviderImpl.h>
+#include <platform/realtek_bee/zephyr/DeviceInstanceInfoProviderImpl.h>
 #endif
 
 #ifdef CONFIG_CHIP_PW_RPC

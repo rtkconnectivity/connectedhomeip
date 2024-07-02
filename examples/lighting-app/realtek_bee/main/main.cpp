@@ -36,15 +36,17 @@ using namespace ::chip;
 #include <openthread-system.h>
 #include "soc.h"
 #include "mac_driver.h"
+#include "rtl_wdt.h"
 
 extern "C"
 {
 // replace misc.c
 
+extern void WDG_SystemReset(WDTMode_TypeDef wdt_mode, int reset_reason);
 void __wrap_otPlatReset(otInstance *aInstance)
 {
  	ARG_UNUSED(aInstance);
-	sys_reboot(SYS_REBOOT_WARM);
+	WDG_SystemReset(RESET_ALL, 0xff);
 }
 
 bool milli_fired = false;
@@ -63,6 +65,7 @@ void micro_handler(void)
 
 typedef void (*bt_timer_handler_t)(void);
 extern void mac_RegisterBtTimerHandler(uint32_t tid, bt_timer_handler_t handler);
+extern void mac_SetBTClkUSInt_patch(uint32_t tid, uint64_t time_us);
 void __wrap_platformAlarmInit(void)
 {
     mac_RegisterBtTimerHandler(MAC_BT_TIMER0, milli_handler);
@@ -94,8 +97,7 @@ void __wrap_otPlatAlarmMicroStartAt(otInstance *aInstance, uint32_t t0, uint32_t
     uint64_t target_us = mac_ConvertT0AndDtTo64BitTime(t0, dt, &now);
     if (target_us > now)
     {
-        target_us = target_us % MAX_BT_CLOCK_COUNTER;
-        mac_SetBTClkUSInt(MAC_BT_TIMER1, target_us);
+        mac_SetBTClkUSInt_patch(MAC_BT_TIMER1, target_us);
     }
     else
     {
@@ -122,8 +124,7 @@ void __wrap_otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t t0, uint32_t
     if (target_ms > now_ms)
     {
         target_us = now + (target_ms - now_ms)*1000;
-        target_us = target_us % MAX_BT_CLOCK_COUNTER;
-        mac_SetBTClkUSInt(MAC_BT_TIMER0, target_us);
+        mac_SetBTClkUSInt_patch(MAC_BT_TIMER0, target_us);
     }
     else
     {

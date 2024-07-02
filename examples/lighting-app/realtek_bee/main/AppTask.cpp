@@ -179,8 +179,8 @@ CHIP_ERROR AppTask::Init()
     SetDeviceAttestationCredentialsProvider(&mFactoryDataProvider);
     SetCommissionableDataProvider(&mFactoryDataProvider);
 #else
-    // SetDeviceInstanceInfoProvider(&DeviceInstanceInfoProviderMgrImpl());
-    // SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+    SetDeviceInstanceInfoProvider(&DeviceInstanceInfoProviderMgrImpl());
+    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 #endif
 
     // Init ZCL Data Model and CHIP App Server
@@ -194,11 +194,13 @@ CHIP_ERROR AppTask::Init()
     ConfigurationMgr().LogDeviceConfig();
     PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kBLE));
 
+#if CHIP_DEVICE_CONFIG_ENABLE_CHIPOBLE
     ChipLogProgress(DeviceLayer, "Start BLE Adv");
     if (CONFIG_NETWORK_LAYER_BLE)
     {
         ConnectivityMgr().SetBLEAdvertisingEnabled(true);
     }
+#endif
 
     // Add CHIP event handler and start CHIP thread.
     // Note that all the initialization code should happen prior to this point to avoid data races

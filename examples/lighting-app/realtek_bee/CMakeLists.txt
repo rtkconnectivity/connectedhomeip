@@ -68,7 +68,8 @@ target_include_directories(app PRIVATE
                            ${GEN_DIR}/lighting-app
                            ${REALTEK_COMMON}/common/include
                            ${REALTEK_COMMON}/util
-                           ${REALTEK_COMMON}/app/include)
+                           ${REALTEK_COMMON}/app/include
+                           ${ZEPHYR_BASE}/../modules/hal/realtek/bee/drivers/wdt/inc)
 
 target_sources(app PRIVATE
                main/main.cpp
@@ -79,6 +80,9 @@ target_sources(app PRIVATE
 
 target_link_options(app
               PUBLIC
+                  -Wl,--wrap,mac_EnterCritical_rom
+                  -Wl,--wrap,mac_ExitCritical_rom
+                  -Wl,--wrap,mac_RstRF_rom
                   -Wl,--wrap,otPlatReset
                   -Wl,--wrap,platformAlarmInit
                   -Wl,--wrap,platformAlarmProcess
