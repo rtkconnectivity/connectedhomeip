@@ -68,7 +68,11 @@ endif()
 
 matter_add_flags(-DNL_ASSERT_USE_FLAGS_DEFAULT=1)
 
-zephyr_include_directories(${CHIP_ROOT}/src/platform/realtek_bee/zephyr)
+zephyr_include_directories(
+    ${CHIP_ROOT}/src/platform/realtek_bee/zephyr
+    ${CHIP_ROOT}/src/platform/realtek_bee/zephyr/hw_acc
+    ${ZEPHYR_BASE}/../modules/crypto/mbedtls/library/
+)
 
 zephyr_get_compile_flags(ZEPHYR_CFLAGS_C C)
 matter_add_cflags("${ZEPHYR_CFLAGS_C}")

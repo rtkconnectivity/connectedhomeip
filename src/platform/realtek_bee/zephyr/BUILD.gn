@@ -55,7 +55,16 @@ static_library("realtek_bee") {
     "${chip_root}/src/platform/logging:headers",
   ]
 
-  public = [ "${chip_root}/src/credentials/DeviceAttestationCredsProvider.h" ]
+  public = [
+    "${chip_root}/src/credentials/CHIPCert.h",
+    "${chip_root}/src/credentials/CertificationDeclaration.h",
+    "${chip_root}/src/credentials/DeviceAttestationCredsProvider.h",
+    "${chip_root}/src/credentials/attestation_verifier/DefaultDeviceAttestationVerifier.h",
+    "${chip_root}/src/credentials/attestation_verifier/DeviceAttestationVerifier.h",
+    "${chip_root}/src/credentials/examples/DeviceAttestationCredsExample.h",
+    "${chip_root}/src/credentials/examples/ExampleDACs.h",
+    "${chip_root}/src/credentials/examples/ExamplePAI.h",
+  ]
 
   public_deps = [ "${chip_root}/src/platform:platform_base" ]
 
@@ -82,6 +91,12 @@ static_library("realtek_bee") {
       "../../OpenThread/OpenThreadUtils.cpp",
       "../../Zephyr/ThreadStackManagerImpl.cpp",
       "ThreadStackManagerImpl.h",
+      "hw_acc/crypto_engine_nsc.h",
+      "hw_acc/ecp_alt.h",
+      "hw_acc/ecp_alt.c",
+      "hw_acc/ecp_curves_alt.c",
+      "hw_acc/mbedtls_hw_interface.h",
+      "hw_acc/mbedtls_hw_interface.c",
     ]
 
     if (chip_mdns == "platform") {
