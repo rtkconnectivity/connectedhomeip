@@ -94,23 +94,19 @@ config COMMON_LIBC_MALLOC_ARENA_SIZE
     default 12288
 
 config NET_IPV6_MLD
-    default n
+    default y
 
 # Network buffers
 config NET_PKT_RX_COUNT
-    default 4 if PM
     default 8
 
 config NET_PKT_TX_COUNT
-    default 4 if PM
     default 8
 
 config NET_BUF_RX_COUNT
-    default 16 if PM
     default 32
 
 config NET_BUF_TX_COUNT
-    default 16 if PM
     default 32
 
 config GPIO
@@ -299,8 +295,5 @@ config PWM_SHELL
 
 config OPENTHREAD_SHELL
     default n
-
-config CHIP_TASK_STACK_SIZE
-	default 4864 if PM
 
 endif
