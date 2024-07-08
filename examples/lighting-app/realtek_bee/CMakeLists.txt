@@ -84,13 +84,6 @@ target_link_options(app
                   -Wl,--wrap,mac_ExitCritical_rom
                   -Wl,--wrap,mac_RstRF_rom
                   -Wl,--wrap,otPlatReset
-                  -Wl,--wrap,platformAlarmInit
-                  -Wl,--wrap,platformAlarmProcess
-                  -Wl,--wrap,otPlatAlarmMilliGetNow
-                  -Wl,--wrap,otPlatAlarmMilliStartAt
-                  -Wl,--wrap,otPlatAlarmMilliStop
-                  -Wl,--wrap,otPlatAlarmMicroStartAt
-                  -Wl,--wrap,otPlatAlarmMicroStop
           )
 
 chip_configure_data_model(app

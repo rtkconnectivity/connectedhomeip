@@ -1,4 +1,8 @@
 / {
+	chosen {
+		zephyr,ieee802154 = &ieee802154;
+	};
+
 	leds {
 		compatible = "gpio-leds";
 		led0: led_0 {
@@ -58,12 +62,12 @@
 		ram_code: memory@12E400 {
 			device_type = "ram code region";
 			compatible = "zephyr,memory-region", "arm,itcm";
-			reg = <0x12E400 0xA000>;
+			reg = <0x12E400 0x9000>;
 			zephyr,memory-region = "ITCM";
 		};
-		heap: memory@138400 {
+		heap: memory@137400 {
 			device_type = "heap region";
-			reg = <0x138400 0x4800>;
+			reg = <0x137400 0x5800>;
 		};
 	};
 };
@@ -91,4 +95,8 @@
 			reg = <0x12d000 DT_SIZE_K(32)>;
 		};
 	};
+};
+
+&ieee802154 {
+	status = "okay";
 };
