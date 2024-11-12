@@ -39,7 +39,7 @@
 #include <system/SystemClock.h>
 
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
-#include <ota/OTAInitializer.h>
+#include <OTAInitializer.h>
 #endif
 
 #include <zephyr/kernel.h>
@@ -80,6 +80,7 @@ constexpr uint32_t kInitOTARequestorDelaySec = 3;
 
 void InitOTARequestorHandler(System::Layer * systemLayer, void * appState)
 {
+    ChipLogProgress(Zcl, "InitOTARequestorHandler");
     OTAInitializer::Instance().InitOTARequestor();
 }
 #endif
@@ -413,7 +414,13 @@ void AppTask::ChipEventHandler(const ChipDeviceEvent * event, intptr_t /* arg */
         UpdateStatusLED();
         break;
 
-    case DeviceEventType::kDnssdInitialized:
+    case DeviceEventType::kThreadStateChange:
+        sIsNetworkProvisioned = ConnectivityMgr().IsThreadProvisioned();
+        sIsNetworkEnabled     = ConnectivityMgr().IsThreadEnabled();
+        UpdateStatusLED();
+        break;
+
+    case DeviceEventType::kServerReady:
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
         if (!isOTAInitialized)
         {
@@ -421,27 +428,8 @@ void AppTask::ChipEventHandler(const ChipDeviceEvent * event, intptr_t /* arg */
                                                         InitOTARequestorHandler, nullptr);
             isOTAInitialized = true;
         }
-#endif /* CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR */
+#endif
         break;
-
-    case DeviceEventType::kThreadStateChange:
-        sIsNetworkProvisioned = ConnectivityMgr().IsThreadProvisioned();
-        sIsNetworkEnabled     = ConnectivityMgr().IsThreadEnabled();
-        UpdateStatusLED();
-        break;
-
-    // rock: useful or not?
-    // case DeviceEventType::kInterfaceIpAddressChanged:
-    //     if ((event->InterfaceIpAddressChanged.Type == InterfaceIpChangeType::kIpV4_Assigned) ||
-    //         (event->InterfaceIpAddressChanged.Type == InterfaceIpChangeType::kIpV6_Assigned))
-    //     {
-    //         // MDNS server restart on any ip assignment: if link local ipv6 is configured, that
-    //         // will not trigger a 'internet connectivity change' as there is no internet
-    //         // connectivity. MDNS still wants to refresh its listening interfaces to include the
-    //         // newly selected address.
-    //         chip::app::DnssdServer::Instance().StartServer();
-    //     }
-    //     break;
         
     default:
         break;

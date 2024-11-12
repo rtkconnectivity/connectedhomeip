@@ -1,0 +1,35 @@
+#!/bin/bash
+
+OTA_HEADER_VERSION=1.0.0.2
+OTA_BIN_FOLDER=../../../../examples/lighting-app/realtek_bee/build/zephyr/ota/
+
+mkdir -p ${OTA_BIN_FOLDER}
+cp -f *.ini  ${OTA_BIN_FOLDER}
+cp -f *_MP_*.bin       ${OTA_BIN_FOLDER}
+cp -f firmware/bank0/* ${OTA_BIN_FOLDER}
+cp -f firmware/bank1/* ${OTA_BIN_FOLDER}
+
+PROJECT_CONFIG=../../../../examples/lighting-app/realtek_bee/main/include/CHIPProjectConfig.h
+VENDOR_ID=$(awk '/#define CHIP_DEVICE_CONFIG_DEVICE_VENDOR_ID/{print $3}' ${PROJECT_CONFIG})
+PRODUCT_ID=$(awk '/#define CHIP_DEVICE_CONFIG_DEVICE_PRODUCT_ID/{print $3}' ${PROJECT_CONFIG})
+VERSION=$(awk '/#define CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION/{print $3; exit}' ${PROJECT_CONFIG})
+VERSION_STR=$(awk '/#define CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING/{print $3}' ${PROJECT_CONFIG})
+
+echo "VENDOR_ID=${VENDOR_ID}"
+echo "PRODUCT_ID=${PRODUCT_ID}"
+echo "VERSION=${VERSION}"
+echo "VERSION_STR=${VERSION_STR}"
+
+chmod +x tools/FlashMapGenerateCli
+chmod +x tools/PackCli
+
+tools/FlashMapGenerateCli ${OTA_BIN_FOLDER} ${OTA_HEADER_VERSION} ${OTA_BIN_FOLDER}
+
+tools/PackCli 8762g_vb ota ${OTA_BIN_FOLDER} ../../../../examples/lighting-app/realtek_bee/build/zephyr
+
+../../../../src/app/ota_image_tool.py create -v ${VENDOR_ID} -p ${PRODUCT_ID} -vn ${VERSION} -vs ${VERSION_STR} -da sha256 ${OTA_BIN_FOLDER}/ImgPacketFile*.bin ${OTA_BIN_FOLDER}/matter.ota
+
+rm -rf ${OTA_BIN_FOLDER}/*.bin
+rm -rf ${OTA_BIN_FOLDER}/*.ini
+
+# rm *_MP_*.bin

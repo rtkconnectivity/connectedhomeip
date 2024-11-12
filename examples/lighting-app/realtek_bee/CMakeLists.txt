@@ -67,6 +67,7 @@ target_include_directories(app PRIVATE
                            ${GEN_DIR}/app-common
                            ${GEN_DIR}/lighting-app
                            ${REALTEK_COMMON}/common/include
+                           ${REALTEK_COMMON}/ota
                            ${REALTEK_COMMON}/util
                            ${REALTEK_COMMON}/app/include
                            ${ZEPHYR_BASE}/../modules/hal/realtek/bee/drivers/wdt/inc)
@@ -91,9 +92,9 @@ chip_configure_data_model(app
     ZAP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../lighting-common/lighting-app.zap
 )
 
-# if(CONFIG_BOOTLOADER_MCUBOOT)
-#   target_sources(app PRIVATE ${REALTEK_COMMON}/util/src/OTAUtil.cpp)
-# endif()
+if(CONFIG_CHIP_OTA_REQUESTOR)
+  target_sources(app PRIVATE ${REALTEK_COMMON}/ota/OTAInitializer.cpp)
+endif()
 
 # Fix for unused swap parameter in: zephyr/include/zephyr/arch/riscv/irq.h:70
 add_compile_options(-Wno-error=unused-parameter)

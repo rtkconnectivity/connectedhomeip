@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ "$1" = "bank1" ]; then
+    BIN_FILE='../../../../examples/lighting-app/realtek_bee/build/zephyr/zephyr_bank1.bin'
+    MP_FILE='../../../../examples/lighting-app/realtek_bee/build/zephyr/zephyr_bank1_MP.bin'
+else
+    BIN_FILE='../../../../examples/lighting-app/realtek_bee/build/zephyr/zephyr_bank0.bin'
+    MP_FILE='../../../../examples/lighting-app/realtek_bee/build/zephyr/zephyr_bank0_MP.bin'
+fi
+
+chmod +x tools/prepend_header
+chmod +x tools/MD5
+
+cp ../../../../examples/lighting-app/realtek_bee/build/zephyr/zephyr.bin ${BIN_FILE}
+
+tools/prepend_header -t app_code -b 15 -p ${BIN_FILE} -m 1 -i tools/mp.ini -r tools/keys/rtk_ecdsa.pem -a tools/keys/key.json
+
+tools/MD5 ${MP_FILE}
+
+cp ../../../../examples/lighting-app/realtek_bee/build/zephyr/*_MP_*.bin .

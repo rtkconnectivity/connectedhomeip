@@ -90,8 +90,8 @@ config HEAP_MEM_POOL_SIZE
 config CHIP_MALLOC_SYS_HEAP_SIZE
     default 8192 if NET_L2_OPENTHREAD
 
-config COMMON_LIBC_MALLOC_ARENA_SIZE 
-    default 12288
+config COMMON_LIBC_MALLOC_ARENA_SIZE
+    default 8192
 
 config NET_IPV6_MLD
     default y

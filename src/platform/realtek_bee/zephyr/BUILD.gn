@@ -111,8 +111,10 @@ static_library("realtek_bee") {
 
   if (chip_enable_ota_requestor) {
     sources += [
-      "OTAImageProcessorImpl.cpp",
-      "OTAImageProcessorImpl.h",
+      "ota/OTAImageProcessorImpl.cpp",
+      "ota/OTAImageProcessorImpl.h",
+      "ota/matter_ota.c",
+      "ota/matter_ota.h",
     ]
   }
 }
