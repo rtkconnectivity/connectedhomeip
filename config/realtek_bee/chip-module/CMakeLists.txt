@@ -266,6 +266,19 @@ math(EXPR boot_blocks "${mcuboot_size} / ${BLOCK_SIZE}" OUTPUT_FORMAT DECIMAL)
 #   endif()
 # endif()
 
+if (CONFIG_REALTEK_OTA_BANK1)
+    add_custom_target(add_mp_header ALL
+        COMMAND
+        ${CHIP_ROOT}/scripts/tools/realtek_bee/ota/dual_bank_post_build bank1
+    )
+else()
+    add_custom_target(add_mp_header ALL
+        COMMAND
+        ${CHIP_ROOT}/scripts/tools/realtek_bee/ota/dual_bank_post_build bank0
+    )
+endif()
+add_dependencies(add_mp_header ${ZEPHYR_FINAL_EXECUTABLE})
+
 # ==============================================================================
 # Define 'factory_data' target for generating a factory data partition
 # ==============================================================================

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+SCRIPT_PATH=$(cd "$(dirname "$0")"; pwd)
+CHIP_ROOT=${SCRIPT_PATH}/../../../..
+TOOL_PATH=${CHIP_ROOT}/scripts/tools/realtek_bee/ota/tools
+BIN_PATH=${CHIP_ROOT}/examples/lighting-app/realtek_bee/build/zephyr
+
+if [ "$1" = "bank1" ]; then
+    BIN_FILE=${BIN_PATH}/zephyr_bank1.bin
+    MP_FILE=${BIN_PATH}/zephyr_bank1_MP.bin
+else
+    BIN_FILE=${BIN_PATH}/zephyr_bank0.bin
+    MP_FILE=${BIN_PATH}/zephyr_bank0_MP.bin
+fi
+
+chmod +x ${TOOL_PATH}/prepend_header
+chmod +x ${TOOL_PATH}/MD5
+
+cp ${BIN_PATH}/zephyr.bin ${BIN_FILE}
+
+${TOOL_PATH}/prepend_header -t app_code -b 15 -p ${BIN_FILE} -m 1 -i ${TOOL_PATH}/mp.ini -r ${TOOL_PATH}/keys/rtk_ecdsa.pem -a ${TOOL_PATH}/keys/key.json
+
+${TOOL_PATH}/MD5 ${MP_FILE}
+
+cp ${BIN_PATH}/*_MP_*.bin ${TOOL_PATH}/../

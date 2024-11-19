@@ -194,3 +194,7 @@ config CHIP_TASK_STACK_SIZE
 	int
 	default 8192
 
+config REALTEK_OTA_BANK1
+	bool "OTA BANK1 APP"
+	default n
+	depends on CHIP_OTA_REQUESTOR
