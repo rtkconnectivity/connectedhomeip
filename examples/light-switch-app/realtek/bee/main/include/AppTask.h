@@ -22,7 +22,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "AppEvent.h"
 #include "LightSwitch.h"
 
 #include "FreeRTOS.h"
@@ -32,6 +31,7 @@
 #include <platform/CHIPDeviceLayer.h>
 
 #include <platform/realtek/BEE/FactoryDataProvider.h>
+#include "app_msg.h"
 
 class AppTask
 {
@@ -41,11 +41,7 @@ public:
     void InitGpio();
     static void AppTaskMain(void * pvParameter);
 
-    void PostEvent(const AppEvent * event);
-
     void UpdateClusterState();
-
-    static void ButtonEventHandler(uint8_t btnIdx, uint8_t btnPressed);
 
 private:
     friend AppTask & GetAppTask(void);
@@ -56,13 +52,14 @@ private:
     void StartTimer(uint32_t aTimeoutMs);
     void CancelTimer(void);
 
-    void DispatchEvent(AppEvent * event);
+    static void ButtonEventHandler(uint8_t btnIdx, uint8_t btnPressed);
+    static void ButtonHandler(T_IO_MSG *p_msg);
 
-    static void FunctionTimerEventHandler(AppEvent * aEvent);
-    static void FunctionHandler(AppEvent * aEvent);
+    static void FunctionTimerEventHandler(T_IO_MSG *p_msg);
 
-    static void SwitchActionEventHandler(AppEvent * aEvent);
     static void TimerEventHandler(chip::System::Layer * aLayer, void * aAppState);
+
+    static bool PostMessage(T_IO_MSG *p_msg);
 
     enum Function_t
     {

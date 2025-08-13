@@ -18,6 +18,7 @@
 #include "AppTask.h"
 #include "CHIPDeviceManager.h"
 #include <stdlib.h>
+#include "matter_ble.h"
 
 using namespace ::chip;
 using namespace ::chip::app;
@@ -40,6 +41,8 @@ extern "C" void InitGPIO(void)
 extern "C" void ChipTest(void)
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
+
+    matter_ble_init(1);
 
     err = GetAppTask().StartAppTask();
     if (err != CHIP_NO_ERROR)
