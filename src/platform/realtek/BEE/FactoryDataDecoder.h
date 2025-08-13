@@ -27,6 +27,14 @@ class FactoryDataDecoder
 public:
     CHIP_ERROR ReadFactoryData(uint8_t * buffer, uint32_t buffer_len, uint16_t * pfactorydata_len);
     CHIP_ERROR DecodeFactoryData(uint8_t * buffer, FactoryData * fdata, uint16_t factorydata_len);
+
+    CHIP_ERROR FactoryDataGetValue(uint8_t tag,
+                                   uint8_t *input,
+                                   uint32_t input_len,
+                                   uint8_t *buf,
+                                   size_t buf_size,
+                                   uint16_t *data_len);
+
     static FactoryDataDecoder & GetInstance()
     {
         static FactoryDataDecoder instance;

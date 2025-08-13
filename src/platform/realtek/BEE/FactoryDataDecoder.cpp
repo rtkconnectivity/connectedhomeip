@@ -16,14 +16,11 @@
  */
 
 #include "FactoryDataDecoder.h"
-#include "chip_porting.h"
 #include "matter_utils.h"
 #include <platform/internal/CHIPDeviceLayerInternal.h>
 
 namespace chip {
 namespace DeviceLayer {
-
-extern "C" {
 
 CHIP_ERROR FactoryDataDecoder::ReadFactoryData(uint8_t * buffer, uint32_t buffer_len, uint16_t * pfactorydata_len)
 {
@@ -44,6 +41,21 @@ CHIP_ERROR FactoryDataDecoder::DecodeFactoryData(uint8_t * buffer, FactoryData *
 
     return CHIP_NO_ERROR;
 }
+
+CHIP_ERROR FactoryDataDecoder::FactoryDataGetValue(uint8_t tag,
+                                                   uint8_t *input,
+                                                   uint32_t input_len,
+                                                   uint8_t *buf,
+                                                   size_t buf_size,
+                                                   uint16_t *data_len)
+{
+    if(0 != matter_factory_data_value_get(tag, input, input_len, buf, buf_size, data_len))
+    {
+        return CHIP_ERROR_INTERNAL;
+    }
+
+    return CHIP_NO_ERROR;
 }
+
 } // namespace DeviceLayer
 } // namespace chip
