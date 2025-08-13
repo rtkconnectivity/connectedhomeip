@@ -32,7 +32,7 @@
 #endif
 
 #include "FreeRTOS.h"
-#include "mem_config.h"
+#include "chip_porting.h"
 #include "os_mem.h"
 
 namespace chip {
@@ -53,14 +53,14 @@ CHIP_ERROR DiagnosticDataProviderImpl::GetCurrentHeapFree(uint64_t & currentHeap
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetCurrentHeapUsed(uint64_t & currentHeapUsed)
 {
-    size_t usedHeapSize = NS_HEAP_SIZE - os_mem_peek(RAM_TYPE_DATA_ON);
+    size_t usedHeapSize = os_get_total_heap_size() - os_mem_peek(RAM_TYPE_DATA_ON);
     currentHeapUsed     = static_cast<uint64_t>(usedHeapSize);
     return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetCurrentHeapHighWatermark(uint64_t & currentHeapHighWatermark)
 {
-    size_t highestHeapUsageRecorded = NS_HEAP_SIZE - xPortGetMinimumEverFreeHeapSize(RAM_TYPE_DATA_ON);
+    size_t highestHeapUsageRecorded = os_get_total_heap_size() - xPortGetMinimumEverFreeHeapSize(RAM_TYPE_DATA_ON);
     currentHeapHighWatermark        = static_cast<uint64_t>(highestHeapUsageRecorded);
     return CHIP_NO_ERROR;
 }

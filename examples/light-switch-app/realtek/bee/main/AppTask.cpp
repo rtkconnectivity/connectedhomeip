@@ -478,7 +478,7 @@ void AppTask::FunctionHandler(AppEvent * aEvent)
             sAppTask.mFunction = kFunction_NoneSelected;
 
             chip::DeviceManager::CHIPDeviceManager::GetInstance().Shutdown();
-            WDT_SystemReset(RESET_ALL, SW_RESET_APP_START);
+            WDG_SystemReset(RESET_ALL, SW_RESET_APP_START);
         }
         else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == kFunction_FactoryReset)
         {
@@ -521,13 +521,13 @@ void AppTask::PostEvent(const AppEvent * aEvent)
     if (sAppEventQueue != nullptr)
     {
         BaseType_t status;
-        if (xPortIsInsideInterrupt())
-        {
-            BaseType_t higherPrioTaskWoken = pdFALSE;
-            status                         = xQueueSendFromISR(sAppEventQueue, aEvent, &higherPrioTaskWoken);
-            portYIELD_FROM_ISR(higherPrioTaskWoken);
-        }
-        else
+        // if (xPortIsInsideInterrupt())
+        // {
+        //     BaseType_t higherPrioTaskWoken = pdFALSE;
+        //     status                         = xQueueSendFromISR(sAppEventQueue, aEvent, &higherPrioTaskWoken);
+        //     portYIELD_FROM_ISR(higherPrioTaskWoken);
+        // }
+        // else
         {
             status = xQueueSend(sAppEventQueue, aEvent, 1);
         }
