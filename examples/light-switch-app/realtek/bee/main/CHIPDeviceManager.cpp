@@ -91,6 +91,7 @@ CHIP_ERROR CHIPDeviceManager::Init(CHIPDeviceManagerCallbacks * cb)
     err = PlatformMgr().StartEventLoopTask();
     SuccessOrExit(err);
 
+#if CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
 #if CHIP_ENABLE_OPENTHREAD
     ChipLogProgress(DeviceLayer, "Initializing OpenThread stack");
     err = ThreadStackMgr().InitThreadStack();
@@ -120,6 +121,9 @@ CHIP_ERROR CHIPDeviceManager::Init(CHIPDeviceManagerCallbacks * cb)
     SuccessOrExit(err);
     ChipLogProgress(DeviceLayer, "Start OpenThread task done!!");
 #endif // CHIP_ENABLE_OPENTHREAD
+#else  // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
+    sThreadNetworkDriver.Init();
+#endif // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
 
     mIsInitDone = true;
 
