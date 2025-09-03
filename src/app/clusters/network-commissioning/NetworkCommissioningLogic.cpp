@@ -192,7 +192,7 @@ void NetworkCommissioningLogic::SendNonConcurrentConnectNetworkResponse()
 #endif // CONFIG_NETWORK_LAYER_BLE
     ChipLogProgress(NetworkProvisioning, "Non-concurrent mode. Send ConnectNetworkResponse(Success)");
     Commands::ConnectNetworkResponse::Type response;
-    response.networkingStatus = NetworkCommissioning::Status::kSuccess;
+    response.networkingStatus = chip::DeviceLayer::NetworkCommissioning::Status::kSuccess;
     commandHandle->AddResponse(mAsyncCommandPath, response);
 }
 #endif // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION

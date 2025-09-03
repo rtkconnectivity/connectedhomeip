@@ -27,6 +27,13 @@ using namespace ::chip::DeviceManager;
 using namespace ::chip::DeviceLayer;
 using namespace ::chip::System;
 
+#if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
+extern "C" otInstance *otInstanceInitSingle(void)
+{
+    return NULL;
+}
+#endif
+
 extern "C" void ChipTestShutdown(void)
 {
     ChipLogProgress(DeviceLayer, "Light switch APP Demo! Shutdown Now!");
