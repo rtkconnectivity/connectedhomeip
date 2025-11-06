@@ -33,13 +33,13 @@ endif (matter_enable_ota_requestor)
 list(
     APPEND ${list_chip_main_sources}
 
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/AppTask.cpp
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/LightSwitch.cpp
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/chipinterface.cpp
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/BindingHandler.cpp
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/DeviceCallbacks.cpp
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/CHIPDeviceManager.cpp
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/Globals.cpp
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/AppTask.cpp
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/LightSwitch.cpp
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/chipinterface.cpp
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/BindingHandler.cpp
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/DeviceCallbacks.cpp
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/CHIPDeviceManager.cpp
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/Globals.cpp
     ${chip_dir}/examples/platform/realtek/bee/util/LEDWidget.cpp
     ${chip_dir}/examples/providers/DeviceInfoProviderImpl.cpp
 )
@@ -63,7 +63,7 @@ target_include_directories(
     ${chip_dir}/zzz_generated/light-switch-app/zap-generated
     ${chip_dir}/zzz_generated/app-common
     ${chip_dir}/examples/light-switch-app/light-switch-common
-    ${chip_dir}/examples/light-switch-app/realtek/bee/main/include
+    ${chip_dir}/examples/light-switch-app/realtek/common/main/include
     ${chip_dir}/examples/platform/realtek/bee
     ${chip_dir}/examples/providers
     ${chip_dir_output}/gen/include
