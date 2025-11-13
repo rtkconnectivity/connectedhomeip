@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-arm_arch = "armv8.1-m.main+dsp+mve+fp"
+arm_arch = "armv6-m"
 
 arm_float_abi = "soft"

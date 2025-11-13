@@ -19,6 +19,7 @@
 #include "CHIPDeviceManager.h"
 #include <stdlib.h>
 #include "matter_ble.h"
+#include "os_mem.h"
 
 using namespace ::chip;
 using namespace ::chip::app;
@@ -48,6 +49,9 @@ extern "C" void InitGPIO(void)
 extern "C" void ChipTest(void)
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
+
+    DBG_DIRECT("[ChipTest] remain data_ram_size = %d, buffer_ram_size = %d",
+               os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
 
     matter_ble_init(1);
 
@@ -129,3 +133,85 @@ extern "C" void RegisterSwitchCommandCallback(P_ProcessCommandCallback cback)
     g_NotifyUpperStatusChange = cback;
 }
 #endif
+
+// Warkaround for ld error:undefined reference to '__sync_synchronize'
+// refer to https://stackoverflow.com/questions/64658430/gnu-arm-embedded-toolchain-undefined-reference-to-sync-synchronize
+extern "C" void __sync_synchronize() {}
+
+extern "C" unsigned int __atomic_fetch_add_4(volatile void * ptr, unsigned int val, int memorder)
+{
+    return (*(unsigned int *) ptr + val);
+}
+
+extern "C" bool __atomic_compare_exchange_4(volatile void * pulDestination, void * ulComparand, unsigned int desired, bool weak,
+                                            int success_memorder, int failure_memorder)
+{
+    bool ulReturnValue;
+    if (*(unsigned int *) pulDestination == *(unsigned int *) ulComparand)
+    {
+        *(unsigned int *) pulDestination = desired;
+        ulReturnValue                    = true;
+    }
+    else
+    {
+        *(unsigned int *) ulComparand = *(unsigned int *) pulDestination;
+        ulReturnValue                 = false;
+    }
+    return ulReturnValue;
+}
+
+extern "C" unsigned int __atomic_fetch_sub_4(volatile void * ptr, unsigned int val, int memorder)
+{
+    return (*(unsigned int *) ptr + val);
+}
+extern "C" bool __atomic_compare_exchange_1(volatile void * pulDestination, void * ulComparand, unsigned char desired, bool weak,
+                                            int success_memorder, int failure_memorder)
+{
+    bool ulReturnValue;
+    if (*(unsigned char *) pulDestination == *(unsigned char *) ulComparand)
+    {
+        *(unsigned char *) pulDestination = desired;
+        ulReturnValue                     = true;
+    }
+    else
+    {
+        *(unsigned char *) ulComparand = *(unsigned char *) pulDestination;
+        ulReturnValue                  = false;
+    }
+    return ulReturnValue;
+}
+
+extern "C" unsigned int __atomic_fetch_and_4(volatile void * pulDestination, unsigned int ulValue, int memorder)
+{
+    unsigned int ulCurrent;
+
+    ulCurrent = *(unsigned int *) pulDestination;
+    *(unsigned int *) pulDestination &= ulValue;
+    return ulCurrent;
+}
+
+extern "C" bool __sync_bool_compare_and_swap_4(volatile void * ptr, unsigned int oldval, unsigned int newval)
+{
+    if (*(unsigned int *) ptr == oldval)
+    {
+        *(unsigned int *) ptr = newval;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+extern "C" bool __sync_bool_compare_and_swap_1(volatile void * ptr, unsigned char oldval, unsigned char newval)
+{
+    if (*(unsigned char *) ptr == oldval)
+    {
+        *(unsigned char *) ptr = newval;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}

@@ -28,6 +28,7 @@
 #include <platform/PlatformManager.h>
 #include <platform/internal/CHIPDeviceLayerInternal.h>
 #include <platform/internal/GenericPlatformManagerImpl_FreeRTOS.ipp>
+#include "os_mem.h"
 
 namespace chip {
 namespace DeviceLayer {
@@ -40,6 +41,9 @@ CHIP_ERROR PlatformManagerImpl::_InitChipStack(void)
 
     err = System::Clock::InitClock_RealTime();
     SuccessOrExit(err);
+
+    DBG_DIRECT("[_InitChipStack] remain data_ram_size = %d, buffer_ram_size = %d",
+               os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
 
 #if CHIP_SYSTEM_CONFIG_USE_LWIP
 	// Initialize LwIP.
