@@ -36,6 +36,8 @@
 #include <platform/OpenThread/GenericNetworkCommissioningThreadDriver.h>
 #endif // CHIP_ENABLE_OPENTHREAD
 
+#include "os_mem.h"
+
 using namespace ::chip;
 
 namespace chip {
@@ -84,6 +86,8 @@ CHIP_ERROR CHIPDeviceManager::Init(CHIPDeviceManagerCallbacks * cb)
 #if CONFIG_NETWORK_LAYER_BLE
     ConnectivityMgr().SetBLEAdvertisingEnabled(true);
 #endif
+    DBG_DIRECT("[StartEventLoopTask] remain data_ram_size = %d, buffer_ram_size = %d",
+               os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
 
     PlatformMgr().AddEventHandler(CHIPDeviceManager::CommonDeviceEventHandler, reinterpret_cast<intptr_t>(cb));
 
@@ -123,10 +127,11 @@ CHIP_ERROR CHIPDeviceManager::Init(CHIPDeviceManagerCallbacks * cb)
 #endif // CHIP_ENABLE_OPENTHREAD
 #else  // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
     sThreadNetworkDriver.Init();
+    ChipLogProgress(DeviceLayer, "CHIPDeviceManager::Init rock 666");
 #endif // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
 
     mIsInitDone = true;
-
+    ChipLogProgress(DeviceLayer, "CHIPDeviceManager::Init done");
 exit:
     return err;
 }

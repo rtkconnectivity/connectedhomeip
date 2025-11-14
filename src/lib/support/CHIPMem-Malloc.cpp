@@ -93,7 +93,13 @@ void MemoryAllocatorShutdown()
 void * MemoryAlloc(size_t size)
 {
     VERIFY_INITIALIZED();
-    return malloc(size);
+    void *tmp = NULL;
+    tmp = malloc(size);
+    if(tmp == NULL)
+    {
+        DBG_DIRECT("MemoryAlloc fail, size=%d", size);
+    }
+    return tmp;
 }
 
 void * MemoryCalloc(size_t num, size_t size)

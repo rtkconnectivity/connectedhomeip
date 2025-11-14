@@ -30,6 +30,10 @@
 #include <platform/internal/GenericPlatformManagerImpl_FreeRTOS.ipp>
 #include "os_mem.h"
 
+#if SUPPORT_RAM_OVERLAY
+#include "matter_overlay.h"
+#endif
+
 namespace chip {
 namespace DeviceLayer {
 
@@ -46,8 +50,19 @@ CHIP_ERROR PlatformManagerImpl::_InitChipStack(void)
                os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
 
 #if CHIP_SYSTEM_CONFIG_USE_LWIP
-	// Initialize LwIP.
+#if SUPPORT_RAM_OVERLAY
+    if (matter_overlay_get_matter_state() == RTK_MATTER_STATE_UNCOMMISSIONED)
+    {
+        ChipLogProgress(DeviceLayer, "Uncommissioned state: Do not initialize LwIP.");
+    }
+    else
+    {
+        tcpip_init(NULL, NULL);
+    }
+#else
+    // Initialize LwIP.
 	tcpip_init(NULL, NULL);
+#endif
 #endif
 
     chip::Crypto::add_entropy_source(app_entropy_source, NULL, 1);

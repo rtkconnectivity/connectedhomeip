@@ -134,84 +134,86 @@ extern "C" void RegisterSwitchCommandCallback(P_ProcessCommandCallback cback)
 }
 #endif
 
-// Warkaround for ld error:undefined reference to '__sync_synchronize'
-// refer to https://stackoverflow.com/questions/64658430/gnu-arm-embedded-toolchain-undefined-reference-to-sync-synchronize
-extern "C" void __sync_synchronize() {}
-
 extern "C" unsigned int __atomic_fetch_add_4(volatile void * ptr, unsigned int val, int memorder)
 {
-    return (*(unsigned int *) ptr + val);
+    unsigned int old;
+
+    taskENTER_CRITICAL();
+    old = *(unsigned int *)ptr;
+    *(unsigned int *)ptr = old + val;
+    taskEXIT_CRITICAL();
+
+    return old;
 }
 
 extern "C" bool __atomic_compare_exchange_4(volatile void * pulDestination, void * ulComparand, unsigned int desired, bool weak,
                                             int success_memorder, int failure_memorder)
 {
-    bool ulReturnValue;
-    if (*(unsigned int *) pulDestination == *(unsigned int *) ulComparand)
+    bool ret = false;
+    unsigned int old;
+
+    taskENTER_CRITICAL();
+
+    old = *(volatile unsigned int *)pulDestination;
+    if (old == *(unsigned int *)ulComparand)
     {
-        *(unsigned int *) pulDestination = desired;
-        ulReturnValue                    = true;
+        *(volatile unsigned int *)pulDestination = desired;
+        ret = true;
     }
     else
     {
-        *(unsigned int *) ulComparand = *(unsigned int *) pulDestination;
-        ulReturnValue                 = false;
+        *(unsigned int *)ulComparand = old;
+        ret = false;
     }
-    return ulReturnValue;
+
+    taskEXIT_CRITICAL();
+    return ret;
 }
 
 extern "C" unsigned int __atomic_fetch_sub_4(volatile void * ptr, unsigned int val, int memorder)
 {
-    return (*(unsigned int *) ptr + val);
+    unsigned int old;
+
+    taskENTER_CRITICAL();
+    old = *(unsigned int *)ptr;
+    *(unsigned int *)ptr = old - val;
+    taskEXIT_CRITICAL();
+
+    return old;
 }
+
 extern "C" bool __atomic_compare_exchange_1(volatile void * pulDestination, void * ulComparand, unsigned char desired, bool weak,
                                             int success_memorder, int failure_memorder)
 {
-    bool ulReturnValue;
-    if (*(unsigned char *) pulDestination == *(unsigned char *) ulComparand)
+    bool ret = false;
+    unsigned char old;
+
+    taskENTER_CRITICAL();
+
+    old = *(volatile unsigned char *)pulDestination;
+    if (old == *(unsigned char *)ulComparand)
     {
-        *(unsigned char *) pulDestination = desired;
-        ulReturnValue                     = true;
+        *(volatile unsigned char *)pulDestination = desired;
+        ret = true;
     }
     else
     {
-        *(unsigned char *) ulComparand = *(unsigned char *) pulDestination;
-        ulReturnValue                  = false;
+        *(unsigned char *)ulComparand = old;
+        ret = false;
     }
-    return ulReturnValue;
+
+    taskEXIT_CRITICAL();
+    return ret;
 }
 
 extern "C" unsigned int __atomic_fetch_and_4(volatile void * pulDestination, unsigned int ulValue, int memorder)
 {
-    unsigned int ulCurrent;
+    unsigned int old;
 
-    ulCurrent = *(unsigned int *) pulDestination;
-    *(unsigned int *) pulDestination &= ulValue;
-    return ulCurrent;
-}
+    taskENTER_CRITICAL();
+    old = *(unsigned int *)pulDestination;
+    *(unsigned int *)pulDestination = old & ulValue;
+    taskEXIT_CRITICAL();
 
-extern "C" bool __sync_bool_compare_and_swap_4(volatile void * ptr, unsigned int oldval, unsigned int newval)
-{
-    if (*(unsigned int *) ptr == oldval)
-    {
-        *(unsigned int *) ptr = newval;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-extern "C" bool __sync_bool_compare_and_swap_1(volatile void * ptr, unsigned char oldval, unsigned char newval)
-{
-    if (*(unsigned char *) ptr == oldval)
-    {
-        *(unsigned char *) ptr = newval;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return old;
 }
