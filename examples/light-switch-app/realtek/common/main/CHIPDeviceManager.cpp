@@ -127,7 +127,6 @@ CHIP_ERROR CHIPDeviceManager::Init(CHIPDeviceManagerCallbacks * cb)
 #endif // CHIP_ENABLE_OPENTHREAD
 #else  // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
     sThreadNetworkDriver.Init();
-    ChipLogProgress(DeviceLayer, "CHIPDeviceManager::Init rock 666");
 #endif // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
 
     mIsInitDone = true;

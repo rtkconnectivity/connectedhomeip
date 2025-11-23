@@ -381,11 +381,11 @@ CHIP_ERROR AppTask::Init()
     chip::Shell::Engine::Root().RunMainLoop();
 #endif
 
-    check_mem_peak = os_mem_peek(RAM_TYPE_DATA_ON);
-    ChipLogProgress(DeviceLayer, "os_mem_peek(RAM_TYPE_DATA_ON) : (%u)", check_mem_peak);
-
     // Setup switch
     LightSwitch::GetInstance().Init();
+
+    DBG_DIRECT("[AppTask::Init] remain data_ram_size = %d, buffer_ram_size = %d",
+               os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
 
     return err;
 }

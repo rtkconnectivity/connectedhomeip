@@ -36,7 +36,7 @@ list(APPEND CHIP_CFLAGS -DCONFIG_FACTORY_DATA=1)
 endif (matter_enable_factory_data)
 
 if (matter_enable_ram_reduce)
-list(APPEND CHIP_CFLAGS -DSUPPORT_RAM_OVERLAY=1)
+list(APPEND CHIP_CFLAGS -DSUPPORT_RAM_OVERLAY=1 -DCONFIG_ENABLE_RAM_REDUCE=1)
 endif (matter_enable_ram_reduce)
 
 list(
