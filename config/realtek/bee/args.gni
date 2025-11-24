@@ -40,10 +40,10 @@ chip_enable_nfc_onboarding_payload = false
 chip_build_libshell = false
 chip_enable_ota_requestor = false
 
-chip_system_config_use_openthread_inet_endpoints = false
-chip_with_lwip = true
-# openthread_root = "//third_party/openthread/repo"
-# chip_openthread_target = "//config/realtek/bee/openthread:openthread"
+chip_system_config_use_openthread_inet_endpoints = true
+chip_with_lwip = false
+openthread_root = "//third_party/openthread/repo"
+chip_openthread_target = "//config/realtek/bee/openthread:openthread"
 
 chip_config_network_layer_ble = true
 custom_toolchain = "//config/realtek/bee/toolchain:bee"

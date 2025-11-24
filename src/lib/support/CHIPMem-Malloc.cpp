@@ -28,6 +28,7 @@
 #include <lib/support/VerificationMacrosNoLogging.h>
 
 #include <stdlib.h>
+#include "trace.h"
 
 #ifndef NDEBUG
 #include <atomic>
