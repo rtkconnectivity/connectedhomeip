@@ -27,6 +27,8 @@
 
 #include <system/SystemPacketBuffer.h>
 
+#include "matter_overlay.h"
+
 namespace chip {
 namespace Inet {
 
@@ -145,7 +147,14 @@ CHIP_ERROR UDPEndPointImplOT::BindImpl(IPAddressType addressType, const IPAddres
         return INET_ERROR_WRONG_ADDRESS_TYPE;
     }
 
-    ReturnErrorOnFailure(IPv6Bind(mSocket, addr, port, interface));
+    if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_UNCOMMISSIONED)
+    {
+        ChipLogError(Inet, "UDPEndPointImplOT::BindImpl called in uncommissioned state");
+    }
+    else
+    {
+        ReturnErrorOnFailure(IPv6Bind(mSocket, addr, port, interface));
+    }
     mBoundPort   = port;
     mBoundIntfId = interface;
 

@@ -50,7 +50,7 @@ elif [ "$(uname -s)" = "Linux" ]; then
     if [ "${RT_PLATFORM}" = "bee4" ]; then
         PREPEND_HEADER="${REALTEK_SDK_PATH}/tools/prepend_header/prepend_header"
         MD5_TOOL="${REALTEK_SDK_PATH}/tools/md5/MD5"
-    elif [ "${RT_PLATFORM}" = "bee3plus" ]; then
+    elif [ "${RT_PLATFORM}" = "rtl8752h" ]; then
         PREPEND_HEADER="${REALTEK_SDK_PATH}/tool/Gadgets/prepend_header/prepend_header"
         MD5_TOOL="${REALTEK_SDK_PATH}/tool/Gadgets/md5/MD5"
     fi
@@ -64,7 +64,7 @@ if [ "${RT_PLATFORM}" = "bee4" ]; then
         -i "${OT_SRCDIR}/vendor/${RT_PLATFORM}/common/mp.ini" \
         -r "${REALTEK_SDK_PATH}/tools/keys/rtk_ecdsa.pem" \
         -a "${REALTEK_SDK_PATH}/tools/keys/key.json"
-elif [ "${RT_PLATFORM}" = "bee3plus" ]; then
+elif [ "${RT_PLATFORM}" = "rtl8752h" ]; then
     "$PREPEND_HEADER" -t app_code -b 16 -p "$BIN_FILE" -m 1 \
         -i "${OT_SRCDIR}/vendor/${RT_PLATFORM}/common/mp.ini" \
         -r "${REALTEK_SDK_PATH}/tool/Gadgets/rtk_rsa.pem" \
