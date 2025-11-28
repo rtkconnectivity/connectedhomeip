@@ -686,7 +686,18 @@ NetworkCommissioningLogic::HandleConnectNetwork(CommandHandler & handler, const 
     // mConnectingNetworkIDLen and mConnectingNetworkID contain the received SSID
     // As per spec, send the ConnectNetworkResponse(Success) prior to releasing the commissioning channel
     SendNonConcurrentConnectNetworkResponse();
-    RecordNetworkID();
+    if(RecordNetworkID() != CHIP_NO_ERROR)
+    {
+        ChipLogError(NetworkProvisioning, "Failed to record network ID to persistent storage");
+    }
+    if(mpWirelessDriver->CommitConfiguration() != CHIP_NO_ERROR)
+    {
+        ChipLogError(NetworkProvisioning, "Failed to delete old network configuration");
+    }
+    if(mpWirelessDriver->BackupConfiguration() != CHIP_NO_ERROR)
+    {
+        ChipLogError(NetworkProvisioning, "Failed to backup current network configuration");
+    }
 #endif
     return std::nullopt;
 }

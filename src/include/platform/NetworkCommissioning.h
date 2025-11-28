@@ -247,6 +247,8 @@ public:
      */
     virtual void ConnectNetwork(ByteSpan networkId, ConnectCallback * callback) = 0;
 
+    virtual CHIP_ERROR BackupConfiguration() = 0;
+
 #if CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
     /**
      * @brief Disconnect from network, if currently connected.

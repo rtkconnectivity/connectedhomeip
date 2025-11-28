@@ -137,6 +137,11 @@ CHIP_ERROR CHIPDeviceManager::SetNetworkID(ByteSpan networkId)
     return sThreadNetworkDriver.SetThreadNetworkID(networkId);
 }
 
+CHIP_ERROR CHIPDeviceManager::RestoreOpenthreadDataset()
+{
+    return sThreadNetworkDriver.GetDriver().RevertConfiguration();
+}
+
 void CHIPDeviceManager::Shutdown()
 {
     PlatformMgr().Shutdown();

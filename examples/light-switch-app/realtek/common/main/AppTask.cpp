@@ -370,6 +370,7 @@ void AppTask::InitServer(intptr_t arg)
         }
 
         chip::DeviceManager::CHIPDeviceManager::GetInstance().SetNetworkID(ByteSpan(connectingNetworkID, connectingNetworkIDLen));
+        chip::DeviceManager::CHIPDeviceManager::GetInstance().RestoreOpenthreadDataset();
 
         DeviceControlServer::DeviceControlSvr().PostOperationalNetworkStartedEvent();
     }

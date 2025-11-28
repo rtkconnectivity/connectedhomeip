@@ -110,6 +110,8 @@ public:
 
     CHIP_ERROR SetNetworkID(ByteSpan networkId);
 
+    CHIP_ERROR RestoreOpenthreadDataset();
+
     /**
      * Use internally for registration of the ChipDeviceEvents
      */

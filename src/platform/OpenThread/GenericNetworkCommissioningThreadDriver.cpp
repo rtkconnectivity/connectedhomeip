@@ -28,6 +28,8 @@
 
 #include <limits>
 
+#include "matter_overlay.h"
+
 using namespace chip;
 using namespace chip::Thread;
 using namespace chip::DeviceLayer::PersistedStorage;
@@ -141,7 +143,11 @@ CHIP_ERROR GenericThreadDriver::RevertConfiguration()
         error = mStagingNetwork.Init(ByteSpan(datasetBytes, datasetLength));
     }
 
-    if (error == CHIP_NO_ERROR)
+    if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_CASE)
+    {
+        ChipLogProgress(DeviceLayer, "Reverting Thread operational dataset size=%d. Do not attach.", datasetLength);
+    }
+    else if (error == CHIP_NO_ERROR)
     {
         error = DeviceLayer::ThreadStackMgrImpl().AttachToThreadNetwork(mStagingNetwork, /* callback */ nullptr);
     }
@@ -309,6 +315,8 @@ CHIP_ERROR GenericThreadDriver::BackupConfiguration()
     }
 
     ByteSpan dataset = mStagingNetwork.AsByteSpan();
+
+    ChipLogProgress(DeviceLayer, "BackupConfiguration rock dataset size=%d", dataset.size());
 
     return KeyValueStoreMgr().Put(DefaultStorageKeyAllocator::FailSafeNetworkConfig().KeyName(), dataset.data(), dataset.size());
 }

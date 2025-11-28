@@ -102,6 +102,7 @@ public:
     uint8_t GetConnectNetworkTimeoutSeconds() override { return connectNetworkTimeout; }
     ThreadCapabilities GetSupportedThreadFeatures() override;
     uint16_t GetThreadVersion() override;
+    CHIP_ERROR BackupConfiguration() override;
 
     void SetScanNetworkTimeoutSeconds(uint8_t scanTimeoutSec) { scanNetworkTimeoutSeconds = scanTimeoutSec; }
     void SetConnectNetworkTimeoutSeconds(uint8_t connectTimeoutSec) { connectNetworkTimeout = connectTimeoutSec; }
@@ -126,7 +127,6 @@ private:
     uint8_t connectNetworkTimeout;
     static void OnThreadStateChangeHandler(const ChipDeviceEvent * event, intptr_t arg);
     Status MatchesNetworkId(const Thread::OperationalDataset & dataset, const ByteSpan & networkId) const;
-    CHIP_ERROR BackupConfiguration();
     bool BackupExists();
     void CheckInterfaceEnabled();
 
