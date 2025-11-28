@@ -51,6 +51,9 @@
 #include <ota/OTAInitializer.h>
 #endif
 
+#include "matter_overlay.h"
+#include "os_mem.h"
+
 static const char * TAG = "app-devicecallbacks";
 
 using namespace ::chip;
@@ -101,6 +104,14 @@ void InitOTARequestorHandler(System::Layer * systemLayer, void * appState)
 }
 #endif
 
+void RebootAndStartCASE(System::Layer * systemLayer, void * appState)
+{
+    matter_overlay_set_matter_state(RTK_MATTER_STATE_CASE);
+
+    //chip::DeviceManager::CHIPDeviceManager::GetInstance().Shutdown();
+    WDG_SystemReset(RESET_ALL, SW_RESET_APP_START);
+}
+
 void StartOpenthread(System::Layer * systemLayer, void * appState)
 {
     CHIP_ERROR err;
@@ -134,10 +145,6 @@ void StartOpenthread(System::Layer * systemLayer, void * appState)
     ChipLogProgress(DeviceLayer, "Start OpenThread task done!!");
 
     app::DnssdServer::Instance().StartServer();
-
-#if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
-    DeviceControlServer::DeviceControlSvr().PostOperationalNetworkStartedEvent();
-#endif
 }
 
 void DeviceCallbacks::UpdateStatusLED()
@@ -224,8 +231,10 @@ void DeviceCallbacks::DeviceEventCallback(const ChipDeviceEvent * event, intptr_
             chip::DeviceLayer::Internal::BLEMgr().Shutdown();
 
 #if CHIP_ENABLE_OPENTHREAD
-            chip::DeviceLayer::SystemLayer().StartTimer(chip::System::Clock::Milliseconds32(300),
-                                                        StartOpenthread, nullptr);
+            ChipLogProgress(Zcl, "[PASE over] remain data_ram_size = %d, buffer_ram_size = %d",
+                            os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
+            chip::DeviceLayer::SystemLayer().StartTimer(chip::System::Clock::Milliseconds32(500),
+                                                        RebootAndStartCASE, nullptr);
 #endif // CHIP_ENABLE_OPENTHREAD
 #endif
         }

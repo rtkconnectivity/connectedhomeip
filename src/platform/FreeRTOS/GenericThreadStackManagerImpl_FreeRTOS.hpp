@@ -86,18 +86,33 @@ CHIP_ERROR GenericThreadStackManagerImpl_FreeRTOS<ImplClass>::_StartThreadTask(v
 template <class ImplClass>
 void GenericThreadStackManagerImpl_FreeRTOS<ImplClass>::_LockThreadStack(void)
 {
+    if(mThreadStackLock == NULL)
+    {
+        ChipLogError(DeviceLayer, "_LockThreadStack rock: not init yet");
+        return;
+    }
     xSemaphoreTake(mThreadStackLock, portMAX_DELAY);
 }
 
 template <class ImplClass>
 bool GenericThreadStackManagerImpl_FreeRTOS<ImplClass>::_TryLockThreadStack(void)
 {
+    if(mThreadStackLock == NULL)
+    {
+        ChipLogError(DeviceLayer, "_TryLockThreadStack rock: not init yet");
+        return pdTRUE;
+    }
     return xSemaphoreTake(mThreadStackLock, 0) == pdTRUE;
 }
 
 template <class ImplClass>
 void GenericThreadStackManagerImpl_FreeRTOS<ImplClass>::_UnlockThreadStack(void)
 {
+    if(mThreadStackLock == NULL)
+    {
+        ChipLogError(DeviceLayer, "_UnlockThreadStack rock: not init yet");
+        return;
+    }
     xSemaphoreGive(mThreadStackLock);
 }
 

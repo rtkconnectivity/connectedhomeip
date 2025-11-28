@@ -44,6 +44,9 @@ public:
     /// Calls Shutdown on the cluster and unregisters the cluster from the CodegenDataModelProvider Registry
     void Shutdown();
 
+    /// Set NetworkID for Thread Driver Instance
+    CHIP_ERROR SetThreadNetworkID(ByteSpan networkId);
+
     Instance(EndpointId aEndpointId, WiFiDriver * apDelegate) : mCluster(aEndpointId, apDelegate) {}
     Instance(EndpointId aEndpointId, ThreadDriver * apDelegate) : mCluster(aEndpointId, apDelegate) {}
     Instance(EndpointId aEndpointId, EthernetDriver * apDelegate) : mCluster(aEndpointId, apDelegate) {}

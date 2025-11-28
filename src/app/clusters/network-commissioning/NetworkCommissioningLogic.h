@@ -24,6 +24,7 @@
 #include <clusters/NetworkCommissioning/Attributes.h>
 #include <clusters/NetworkCommissioning/Commands.h>
 #include <lib/core/CHIPError.h>
+#include <lib/support/DefaultStorageKeyAllocator.h>
 #include <lib/support/IntrusiveList.h>
 #include <lib/support/ThreadOperationalDataset.h>
 #include <lib/support/Variant.h>
@@ -166,12 +167,19 @@ public:
     // Command handling
     bool IsProcessingAsyncCommand() const { return mAsyncCommandHandle.IsValid(); }
 
+    CHIP_ERROR SetThreadNetworkID(ByteSpan networkId);
+
+#if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
+    static StorageKeyName ConnectingNetworkID() { return StorageKeyName::FromConst("g/cnid"); }
+#endif
+
 private:
     static void OnPlatformEventHandler(const DeviceLayer::ChipDeviceEvent * event, intptr_t arg);
     void OnCommissioningComplete();
     void OnFailSafeTimerExpired();
 #if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
     void SendNonConcurrentConnectNetworkResponse();
+    CHIP_ERROR RecordNetworkID();
 #endif
 
 // TODO: This could be guarded by a separate multi-interface condition instead

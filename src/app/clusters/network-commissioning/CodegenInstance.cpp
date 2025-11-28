@@ -35,6 +35,11 @@ void Instance::Shutdown()
     mCluster.Cluster().Shutdown();
 }
 
+CHIP_ERROR Instance::SetThreadNetworkID(ByteSpan networkId)
+{
+    return mCluster.Cluster().SetThreadNetworkID(networkId);
+}
+
 } // namespace NetworkCommissioning
 } // namespace Clusters
 } // namespace app

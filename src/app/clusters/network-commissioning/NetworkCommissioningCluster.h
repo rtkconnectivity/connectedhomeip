@@ -51,6 +51,8 @@ public:
     // with that name, with different semantics.
     void Deinit() { mLogic.Shutdown(); }
 
+    CHIP_ERROR SetThreadNetworkID(ByteSpan networkId) { return mLogic.SetThreadNetworkID(networkId); }
+
     // Server cluster implementation
     DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
                                                 AttributeValueEncoder & encoder) override;

@@ -29,6 +29,7 @@
 #include <app/TestEventTriggerDelegate.h>
 #include <app/clusters/general-diagnostics-server/general-diagnostics-server.h>
 #include <app/clusters/identify-server/identify-server.h>
+#include <app/clusters/network-commissioning/NetworkCommissioningLogic.h>
 #include <app/clusters/ota-requestor/OTATestEventTriggerHandler.h>
 #include <app/server/Dnssd.h>
 #include <app/server/Server.h>
@@ -36,6 +37,7 @@
 #include <credentials/examples/DeviceAttestationCredsExample.h>
 #include <data-model-providers/codegen/Instance.h>
 #include <inet/EndPointStateOpenThread.h>
+#include <platform/DeviceControlServer.h>
 #include <setup_payload/OnboardingCodesUtil.h>
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 #include <setup_payload/SetupPayload.h>
@@ -47,6 +49,7 @@
 #include <os_msg.h>
 #include <os_task.h>
 #include "matter_ble.h"
+#include "matter_overlay.h"
 
 #if CONFIG_ENABLE_PW_RPC
 #include "Rpc.h"
@@ -341,6 +344,35 @@ void AppTask::InitServer(intptr_t arg)
 
     ConfigurationMgr().LogDeviceConfig();
     PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kBLE));
+
+    if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_UNCOMMISSIONED)
+    {
+        if (chip::Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow() != CHIP_NO_ERROR)
+        {
+            ChipLogError(DeviceLayer, "OpenBasicCommissioningWindow failed");
+        }
+    }
+    else if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_CASE)
+    {
+        uint8_t  connectingNetworkID[DeviceLayer::NetworkCommissioning::kMaxNetworkIDLen] = {0};
+        uint16_t connectingNetworkIDLen = sizeof(connectingNetworkID);
+
+        CHIP_ERROR err = initParams.persistentStorageDelegate->SyncGetKeyValue(Clusters::NetworkCommissioningLogic::ConnectingNetworkID().KeyName(), 
+                            connectingNetworkID, connectingNetworkIDLen);
+        if(err != CHIP_NO_ERROR)
+        {
+            ChipLogProgress(DeviceLayer, "GetNetworkID failed %s", chip::ErrorStr(err));
+        }
+        else
+        {
+            ChipLogProgress(DeviceLayer, "GetNetworkID: ConnectingNetworkID=%s, ConnectingNetworkIDLen=%d",
+                            connectingNetworkID, connectingNetworkIDLen);
+        }
+
+        chip::DeviceManager::CHIPDeviceManager::GetInstance().SetNetworkID(ByteSpan(connectingNetworkID, connectingNetworkIDLen));
+
+        DeviceControlServer::DeviceControlSvr().PostOperationalNetworkStartedEvent();
+    }
 }
 
 void AppTask::InitGpio()
@@ -371,6 +403,13 @@ CHIP_ERROR AppTask::Init()
     else
     {
         ChipLogProgress(DeviceLayer, "DeviceManagerInit() - OK");
+    }
+
+    if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_CASE)
+    {
+        extern void StartOpenthread(System::Layer * systemLayer, void * appState);
+
+        StartOpenthread(NULL, NULL);
     }
 
     // Init ZCL Data Model and start server

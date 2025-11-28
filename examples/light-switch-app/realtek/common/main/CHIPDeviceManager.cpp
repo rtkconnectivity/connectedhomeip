@@ -83,9 +83,6 @@ CHIP_ERROR CHIPDeviceManager::Init(CHIPDeviceManagerCallbacks * cb)
     SetDeviceAttestationCredentialsProvider(&mFactoryDataProvider);
     SetDeviceInstanceInfoProvider(&mFactoryDataProvider);
 
-#if CONFIG_NETWORK_LAYER_BLE
-    ConnectivityMgr().SetBLEAdvertisingEnabled(true);
-#endif
     DBG_DIRECT("[StartEventLoopTask] remain data_ram_size = %d, buffer_ram_size = %d",
                os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
 
@@ -133,6 +130,11 @@ CHIP_ERROR CHIPDeviceManager::Init(CHIPDeviceManagerCallbacks * cb)
     ChipLogProgress(DeviceLayer, "CHIPDeviceManager::Init done");
 exit:
     return err;
+}
+
+CHIP_ERROR CHIPDeviceManager::SetNetworkID(ByteSpan networkId)
+{
+    return sThreadNetworkDriver.SetThreadNetworkID(networkId);
 }
 
 void CHIPDeviceManager::Shutdown()

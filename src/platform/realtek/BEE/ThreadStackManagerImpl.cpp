@@ -52,7 +52,24 @@ ThreadStackManagerImpl ThreadStackManagerImpl::sInstance;
 
 CHIP_ERROR ThreadStackManagerImpl::_InitThreadStack(void)
 {
+#if CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
     return InitThreadStack(NULL);
+#else
+    size_t otInstanceBufferLength = 0;
+    uint8_t *otInstanceBuffer     = NULL;
+
+    // Call to query the buffer size
+    (void)otInstanceInit(NULL, &otInstanceBufferLength);
+    otInstanceBuffer = (uint8_t *)malloc(otInstanceBufferLength);
+    if(otInstanceBuffer == NULL)
+    {
+        return CHIP_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    otInstance *_otInstance = otInstanceInit(otInstanceBuffer, &otInstanceBufferLength);
+
+    return InitThreadStack(_otInstance);
+#endif
 }
 
 CHIP_ERROR ThreadStackManagerImpl::InitThreadStack(otInstance * otInst)

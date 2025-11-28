@@ -108,6 +108,8 @@ public:
 
     bool IsInitDone() const { return mIsInitDone; }
 
+    CHIP_ERROR SetNetworkID(ByteSpan networkId);
+
     /**
      * Use internally for registration of the ChipDeviceEvents
      */

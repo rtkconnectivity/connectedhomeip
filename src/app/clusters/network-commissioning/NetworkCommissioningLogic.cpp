@@ -177,6 +177,19 @@ void NetworkCommissioningLogic::Shutdown()
     mpBaseDriver->Shutdown();
 }
 
+CHIP_ERROR NetworkCommissioningLogic::SetThreadNetworkID(ByteSpan networkId)
+{
+    if (networkId.size() > DeviceLayer::NetworkCommissioning::kMaxNetworkIDLen)
+    {
+        return CHIP_ERROR_INVALID_ARGUMENT;
+    }
+
+    memcpy(mConnectingNetworkID, networkId.data(), networkId.size());
+    mConnectingNetworkIDLen = static_cast<uint8_t>(networkId.size());
+
+    return CHIP_NO_ERROR;
+}
+
 #if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
 void NetworkCommissioningLogic::SendNonConcurrentConnectNetworkResponse()
 {
@@ -195,6 +208,20 @@ void NetworkCommissioningLogic::SendNonConcurrentConnectNetworkResponse()
     response.networkingStatus = chip::DeviceLayer::NetworkCommissioning::Status::kSuccess;
     commandHandle->AddResponse(mAsyncCommandPath, response);
 }
+
+CHIP_ERROR NetworkCommissioningLogic::RecordNetworkID()
+{
+    auto & storage = Server::GetInstance().GetPersistentStorage();
+
+    ReturnErrorOnFailure(storage.SyncSetKeyValue(NetworkCommissioningLogic::ConnectingNetworkID().KeyName(), 
+                         mConnectingNetworkID, mConnectingNetworkIDLen));
+
+    ChipLogProgress(NetworkProvisioning, "RecordNetworkID: ConnectingNetworkID=%s, ConnectingNetworkIDLen=%d",
+                    mConnectingNetworkID, mConnectingNetworkIDLen);
+
+    return CHIP_NO_ERROR;
+}
+
 #endif // CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
 
 void NetworkCommissioningLogic::SetLastNetworkingStatusValue(Attributes::LastNetworkingStatus::TypeInfo::Type networkingStatusValue)
@@ -659,6 +686,7 @@ NetworkCommissioningLogic::HandleConnectNetwork(CommandHandler & handler, const 
     // mConnectingNetworkIDLen and mConnectingNetworkID contain the received SSID
     // As per spec, send the ConnectNetworkResponse(Success) prior to releasing the commissioning channel
     SendNonConcurrentConnectNetworkResponse();
+    RecordNetworkID();
 #endif
     return std::nullopt;
 }
