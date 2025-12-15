@@ -357,6 +357,8 @@ void AppTask::InitServer(intptr_t arg)
         uint8_t  connectingNetworkID[DeviceLayer::NetworkCommissioning::kMaxNetworkIDLen] = {0};
         uint16_t connectingNetworkIDLen = sizeof(connectingNetworkID);
 
+        app::DnssdServer::Instance().StartServer();
+
         CHIP_ERROR err = initParams.persistentStorageDelegate->SyncGetKeyValue(Clusters::NetworkCommissioningLogic::ConnectingNetworkID().KeyName(), 
                             connectingNetworkID, connectingNetworkIDLen);
         if(err != CHIP_NO_ERROR)
@@ -371,6 +373,15 @@ void AppTask::InitServer(intptr_t arg)
 
         chip::DeviceManager::CHIPDeviceManager::GetInstance().SetNetworkID(ByteSpan(connectingNetworkID, connectingNetworkIDLen));
         chip::DeviceManager::CHIPDeviceManager::GetInstance().RestoreOpenthreadDataset();
+
+        //only one fabric?
+        for (const auto & fb : Server::GetInstance().GetFabricTable())
+        {
+            FabricIndex fabricIndex = fb.GetFabricIndex();
+            ChipLogProgress(DeviceLayer, "GetFabricIndex %d", fabricIndex);
+            Server::GetInstance().GetFailSafeContext().ArmFailSafe(fabricIndex, System::Clock::Seconds16(CHIP_DEVICE_CONFIG_FAILSAFE_EXPIRY_LENGTH_SEC));
+            break; // Only print first fabric for now
+        }
 
         DeviceControlServer::DeviceControlSvr().PostOperationalNetworkStartedEvent();
     }

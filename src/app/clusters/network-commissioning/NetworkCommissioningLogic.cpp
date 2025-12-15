@@ -45,6 +45,9 @@
 #include <array>
 #include <utility>
 
+#include "os_mem.h"
+#include "matter_overlay.h"
+
 namespace chip {
 namespace app {
 namespace Clusters {
@@ -698,6 +701,12 @@ NetworkCommissioningLogic::HandleConnectNetwork(CommandHandler & handler, const 
     {
         ChipLogError(NetworkProvisioning, "Failed to backup current network configuration");
     }
+    if(Server::GetInstance().GetFabricTable().CommitPendingFabricData() != CHIP_NO_ERROR)
+    {
+        ChipLogError(NetworkProvisioning, "Failed to commit pending fabric data");
+    }
+    DBG_DIRECT("[HandleConnectNetwork] remain data_ram_size = %d, buffer_ram_size = %d",
+               os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
 #endif
     return std::nullopt;
 }
@@ -867,6 +876,10 @@ void NetworkCommissioningLogic::OnResult(Status commissioningError, CharSpan deb
     }
     if (commissioningError == Status::kSuccess)
     {
+        if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_CASE)
+        {
+            Server::GetInstance().GetCommissioningWindowManager().RestoreEventHandler();
+        }
         DeviceLayer::DeviceControlServer::DeviceControlSvr().PostConnectedToOperationalNetworkEvent(
             ByteSpan(mLastNetworkID, mLastNetworkIDLen));
         SetLastConnectErrorValue(NullNullable);

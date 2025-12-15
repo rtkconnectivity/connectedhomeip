@@ -115,6 +115,8 @@ public:
 
     void Shutdown();
 
+    void RestoreEventHandler();
+
     void OnPlatformEvent(const DeviceLayer::ChipDeviceEvent * event);
 
     // For tests only, allow overriding the spec-defined minimum value of the

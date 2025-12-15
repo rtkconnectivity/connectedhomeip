@@ -40,6 +40,8 @@
 
 #include <algorithm>
 
+#include "matter_overlay.h"
+
 using namespace chip;
 using namespace chip::DeviceLayer;
 
@@ -397,6 +399,10 @@ void DnssdServer::StartServer()
     if (mCommissioningModeProvider)
     {
         mode = mCommissioningModeProvider->GetCommissioningMode();
+    }
+    if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_CASE)
+    {
+        mode = Dnssd::CommissioningMode::kEnabledBasic;
     }
     return StartServer(mode);
 }

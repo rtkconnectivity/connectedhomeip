@@ -197,6 +197,11 @@ void CommissioningWindowManager::OnSessionEstablishmentStarted()
     }
 }
 
+void CommissioningWindowManager::RestoreEventHandler()
+{
+    DeviceLayer::PlatformMgr().AddEventHandler(OnPlatformEventWrapper, reinterpret_cast<intptr_t>(this));
+}
+
 void CommissioningWindowManager::OnSessionEstablished(const SessionHandle & session)
 {
     DeviceLayer::SystemLayer().CancelTimer(HandleSessionEstablishmentTimeout, this);

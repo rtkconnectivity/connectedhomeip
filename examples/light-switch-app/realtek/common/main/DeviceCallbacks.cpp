@@ -144,7 +144,7 @@ void StartOpenthread(System::Layer * systemLayer, void * appState)
 
     ChipLogProgress(DeviceLayer, "Start OpenThread task done!!");
 
-    app::DnssdServer::Instance().StartServer();
+    //app::DnssdServer::Instance().StartServer();
 }
 
 void DeviceCallbacks::UpdateStatusLED()
