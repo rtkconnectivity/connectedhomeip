@@ -435,8 +435,12 @@ CHIP_ERROR AppTask::Init()
     // Setup switch
     LightSwitch::GetInstance().Init();
 
-    DBG_DIRECT("[AppTask::Init] remain data_ram_size = %d, buffer_ram_size = %d",
-               os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
+    ChipLogProgress(DeviceLayer, "[AppTask::Init] remain data_ram_size = %d, buffer_ram_size = %d",
+                    os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
+
+    ChipLogProgress(DeviceLayer, "[AppTask::Init] peek_data_ram_size = %d, peek_buffer_ram_size = %d",
+                    xPortGetMinimumEverFreeHeapSize(RAM_TYPE_DATA_ON),
+                    xPortGetMinimumEverFreeHeapSize(RAM_TYPE_BUFFER_ON));
 
     return err;
 }

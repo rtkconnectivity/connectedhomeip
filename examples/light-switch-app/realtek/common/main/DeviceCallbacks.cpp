@@ -223,6 +223,9 @@ void DeviceCallbacks::DeviceEventCallback(const ChipDeviceEvent * event, intptr_
         break;
 
     case DeviceEventType::kCommissioningComplete:
+        ChipLogProgress(Zcl, "[CommissioningComplete] peek_data_ram_size = %d, peek_buffer_ram_size = %d",
+                        xPortGetMinimumEverFreeHeapSize(RAM_TYPE_DATA_ON),
+                        xPortGetMinimumEverFreeHeapSize(RAM_TYPE_BUFFER_ON));
         break;
 
     case DeviceEventType::kCloseAllBleConnections:
@@ -233,6 +236,9 @@ void DeviceCallbacks::DeviceEventCallback(const ChipDeviceEvent * event, intptr_
 #if CHIP_ENABLE_OPENTHREAD
             ChipLogProgress(Zcl, "[PASE over] remain data_ram_size = %d, buffer_ram_size = %d",
                             os_mem_peek(RAM_TYPE_DATA_ON), os_mem_peek(RAM_TYPE_BUFFER_ON));
+            ChipLogProgress(Zcl, "[PASE over] peek_data_ram_size = %d, peek_buffer_ram_size = %d",
+               xPortGetMinimumEverFreeHeapSize(RAM_TYPE_DATA_ON),
+               xPortGetMinimumEverFreeHeapSize(RAM_TYPE_BUFFER_ON));
             chip::DeviceLayer::SystemLayer().StartTimer(chip::System::Clock::Milliseconds32(500),
                                                         RebootAndStartCASE, nullptr);
 #endif // CHIP_ENABLE_OPENTHREAD
