@@ -181,20 +181,20 @@ void DeviceCallbacks::DeviceEventCallback(const ChipDeviceEvent * event, intptr_
         sHaveBLEConnections = ConnectivityMgr().NumBLEConnections() != 0;
         UpdateStatusLED();
 
-#if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
-        if(isOpenthreadInitialized == false &&
-           ConnectivityMgr().IsBLEAdvertising() == false &&
-           chip::Server::GetInstance().GetCommissioningWindowManager().IsCommissioningWindowOpen() == false)
-        {
-            isOpenthreadInitialized = true;
-            chip::DeviceLayer::Internal::BLEMgr().Shutdown();
+// #if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
+//         if(isOpenthreadInitialized == false &&
+//            ConnectivityMgr().IsBLEAdvertising() == false &&
+//            chip::Server::GetInstance().GetCommissioningWindowManager().IsCommissioningWindowOpen() == false)
+//         {
+//             isOpenthreadInitialized = true;
+//             chip::DeviceLayer::Internal::BLEMgr().Shutdown();
 
-#if CHIP_ENABLE_OPENTHREAD
-            chip::DeviceLayer::SystemLayer().StartTimer(chip::System::Clock::Milliseconds32(300),
-                                                        StartOpenthread, nullptr);
-#endif // CHIP_ENABLE_OPENTHREAD
-        }
-#endif
+// #if CHIP_ENABLE_OPENTHREAD
+//             chip::DeviceLayer::SystemLayer().StartTimer(chip::System::Clock::Milliseconds32(300),
+//                                                         StartOpenthread, nullptr);
+// #endif // CHIP_ENABLE_OPENTHREAD
+//         }
+// #endif
         break;
 
     case DeviceEventType::kInternetConnectivityChange:
@@ -226,6 +226,8 @@ void DeviceCallbacks::DeviceEventCallback(const ChipDeviceEvent * event, intptr_
         ChipLogProgress(Zcl, "[CommissioningComplete] peek_data_ram_size = %d, peek_buffer_ram_size = %d",
                         xPortGetMinimumEverFreeHeapSize(RAM_TYPE_DATA_ON),
                         xPortGetMinimumEverFreeHeapSize(RAM_TYPE_BUFFER_ON));
+
+        matter_overlay_set_matter_state(RTK_MATTER_STATE_COMMISSIONED);
         break;
 
     case DeviceEventType::kCloseAllBleConnections:

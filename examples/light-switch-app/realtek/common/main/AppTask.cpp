@@ -385,6 +385,10 @@ void AppTask::InitServer(intptr_t arg)
 
         DeviceControlServer::DeviceControlSvr().PostOperationalNetworkStartedEvent();
     }
+    else if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_COMMISSIONED)
+    {
+        app::DnssdServer::Instance().StartServer();
+    }
 }
 
 void AppTask::InitGpio()
@@ -417,7 +421,7 @@ CHIP_ERROR AppTask::Init()
         ChipLogProgress(DeviceLayer, "DeviceManagerInit() - OK");
     }
 
-    if(matter_overlay_get_matter_state() == RTK_MATTER_STATE_CASE)
+    if(matter_overlay_get_matter_state() != RTK_MATTER_STATE_UNCOMMISSIONED)
     {
         extern void StartOpenthread(System::Layer * systemLayer, void * appState);
 
