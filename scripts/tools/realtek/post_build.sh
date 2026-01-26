@@ -49,10 +49,10 @@ if [ "$(uname -s)" = "Darwin" ]; then
 elif [ "$(uname -s)" = "Linux" ]; then
     if [ "${RT_PLATFORM}" = "bee4" ]; then
         PREPEND_HEADER="${REALTEK_SDK_PATH}/tools/prepend_header/prepend_header"
-        MD5_TOOL="${REALTEK_SDK_PATH}/tools/md5/MD5"
+        MD5_TOOL="${REALTEK_SDK_PATH}/tools/md5/md5"
     elif [ "${RT_PLATFORM}" = "rtl8752h" ]; then
         PREPEND_HEADER="${REALTEK_SDK_PATH}/tool/Gadgets/prepend_header/prepend_header"
-        MD5_TOOL="${REALTEK_SDK_PATH}/tool/Gadgets/md5/MD5"
+        MD5_TOOL="${REALTEK_SDK_PATH}/tool/Gadgets/md5/md5"
     fi
 fi
 
