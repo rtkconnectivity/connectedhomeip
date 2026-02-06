@@ -31,6 +31,8 @@
 #include <support/CodeUtils.h>
 #include <support/logging/CHIPLogging.h>
 
+#include "matter_overlay.h"
+
 namespace chip {
 namespace DeviceLayer {
 
@@ -212,6 +214,17 @@ void ConfigurationManagerImpl::DoFactoryReset(intptr_t arg)
     CHIP_ERROR err;
 
     ChipLogProgress(DeviceLayer, "Performing factory reset");
+
+#if !CHIP_DEVICE_CONFIG_SUPPORTS_CONCURRENT_CONNECTION
+    if(matter_overlay_set_matter_state(RTK_MATTER_STATE_UNCOMMISSIONED))
+    {
+        ChipLogError(DeviceLayer, "Reset commissioning state flag success");
+    }
+    else
+    {
+        ChipLogError(DeviceLayer, "Reset commissioning state flag failed");
+    }
+#endif
 
     // Erase all values in the chip-config NVS namespace.
     err = BeeConfig::ClearNamespace();
